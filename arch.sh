@@ -87,8 +87,7 @@ arch-chroot $INSTALL_DIR groupadd sudo
 # User configuration
 arch-chroot $INSTALL_DIR useradd -m $USERNAME
 arch-chroot $INSTALL_DIR usermod -a -G sudo $USERNAME
-curl -s https://raw.githubusercontent.com/flavien-perier/linux-configuration/master/shell-configuration.sh \
-    | arch-chroot $INSTALL_DIR bash -
+curl -s https://sh.flavien.io/shell.sh | arch-chroot $INSTALL_DIR bash -
 yes "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd
 
 # DE configuration
