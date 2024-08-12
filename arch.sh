@@ -50,6 +50,8 @@ arch-chroot $INSTALL_DIR ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
 arch-chroot $INSTALL_DIR hwclock --systohc
 arch-chroot $INSTALL_DIR locale-gen
 
+curl -s https://blackarch.org/strap.sh | arch-chroot $INSTALL_DIR bash -
+
 # Network configuration
 cat << EOL > $INSTALL_DIR/etc/hosts
 127.0.0.1 localhost
@@ -87,7 +89,7 @@ arch-chroot $INSTALL_DIR useradd -m $USERNAME
 arch-chroot $INSTALL_DIR usermod -a -G sudo $USERNAME
 curl -s https://raw.githubusercontent.com/flavien-perier/linux-configuration/master/shell-configuration.sh \
     | arch-chroot $INSTALL_DIR bash -
-yes $PASSWORD | arch-chroot $INSTALL_DIR passwd $USERNAME
+yes "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd
 
 # DE configuration
 arch-chroot $INSTALL_DIR pacman --noconfirm -Sy lightdm lightdm-gtk-greeter xfce4 xfce4-goodies
