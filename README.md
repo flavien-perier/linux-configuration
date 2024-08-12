@@ -22,7 +22,7 @@ These 3 shells then have equivalent prompts. These prompts have the following ch
 ## Installation
 
 ```sh
-curl -s https://raw.githubusercontent.com/flavien-perier/linux-configuration/master/shell.sh | sudo sh -
+curl -s https://sh.flavien.io/shell.sh | sudo sh -
 ```
 
 Compatible with systems based on :
