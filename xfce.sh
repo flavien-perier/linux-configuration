@@ -29,6 +29,31 @@ backup_actual_configuration() {
     printf "Actual XFCE configuration is backup in : \033[0;36m$XFCE_BACKUP\033[0m\n"
 }
 
+print_tmux_conf() {
+    cat << EOL
+set-option -g default-shell /usr/bin/fish
+set -g default-command /usr/bin/fish
+
+bind '"' split-window -c "#{pane_current_path}"
+bind % split-window -h -c "#{pane_current_path}"
+
+set -g status off
+set -g history-limit 999999999
+set -g mouse on
+
+setw -g mode-keys vi
+
+set-option -s set-clipboard off
+
+bind P paste-buffer
+bind-key -T copy-mode-vi v send-keys -X begin-selection
+bind-key -T copy-mode-vi y send-keys -X rectangle-toggle
+unbind -T copy-mode-vi Enter
+bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel 'xclip -se c -i'
+bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel 'xclip -se c -i'
+EOL
+}
+
 download_resources() {
     TEMP_DIR=`mktemp -d`
 
@@ -92,6 +117,8 @@ apply_settings_terminal() {
         xfconf-query -n -c xfce4-terminal -p /run-custom-command -t bool -s true
         xfconf-query -n -c xfce4-terminal -p /custom-command -t string -s "tmux"
         xfconf-query -n -c xfce4-terminal -p /scrolling-bar -t string -s "TERMINAL_SCROLLBAR_NONE"
+
+        print_tmux_conf > $HOME/.tmux.conf
     fi
 }
 

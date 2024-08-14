@@ -37,17 +37,9 @@ swapon ${DISK}2
 mount ${DISK}3 $INSTALL_DIR
 
 pacstrap $INSTALL_DIR base linux linux-firmware grub efibootmgr systemd networkmanager sudo pacman flatpak
-curl -s https://blackarch.org/strap.sh | arch-chroot $INSTALL_DIR su $USERNAME -
+curl -s https://blackarch.org/strap.sh | arch-chroot bash -
 
 echo "$HOSTNAME" > $INSTALL_DIR/etc/hostname
-
-# Local configuration
-echo "fr_FR.UTF-8 UTF-8" > $INSTALL_DIR/etc/locale.gen
-echo "LANG=fr_FR.UTF-8" > $INSTALL_DIR/etc/locale.conf
-echo "KEYMAP=fr" > $INSTALL_DIR/etc/vconsole.conf
-arch-chroot $INSTALL_DIR ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
-arch-chroot $INSTALL_DIR hwclock --systohc
-arch-chroot $INSTALL_DIR locale-gen
 
 # Network configuration
 cat << EOL > $INSTALL_DIR/etc/hosts
@@ -80,12 +72,6 @@ genfstab -U $INSTALL_DIR >> $INSTALL_DIR/etc/fstab
 # Sudo configuration
 echo "%sudo	ALL=(ALL:ALL) ALL" >> $INSTALL_DIR/etc/sudoers
 arch-chroot $INSTALL_DIR groupadd sudo
-
-# User configuration
-arch-chroot $INSTALL_DIR useradd -m $USERNAME
-arch-chroot $INSTALL_DIR usermod -a -G sudo $USERNAME
-curl -s https://sh.flavien.io/shell.sh | arch-chroot $INSTALL_DIR bash -
-echo "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd
 
 # DE configuration
 arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
@@ -129,28 +115,26 @@ arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     zip \
     unzip
 
-# Tmux configuration
-cat << EOL > ~/.tmux.conf
-set-option -g default-shell /usr/bin/fish
-set -g default-command /usr/bin/fish
+# User configuration
+arch-chroot $INSTALL_DIR useradd -m $USERNAME
+arch-chroot $INSTALL_DIR usermod -a -G sudo $USERNAME
+curl -s https://sh.flavien.io/shell.sh | arch-chroot $INSTALL_DIR bash -
+echo "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd
 
-bind '"' split-window -c "#{pane_current_path}"
-bind % split-window -h -c "#{pane_current_path}"
-
-set -g status off
-set -g history-limit 999999999
-set -g mouse on
-
-setw -g mode-keys vi
-
-set-option -s set-clipboard off
-
-bind P paste-buffer
-bind-key -T copy-mode-vi v send-keys -X begin-selection
-bind-key -T copy-mode-vi y send-keys -X rectangle-toggle
-unbind -T copy-mode-vi Enter
-bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel 'xclip -se c -i'
-bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel 'xclip -se c -i'
+# Local configuration
+echo "fr_FR.UTF-8 UTF-8" > $INSTALL_DIR/etc/locale.gen
+echo "LANG=fr_FR.UTF-8" > $INSTALL_DIR/etc/locale.conf
+echo "KEYMAP=fr" > $INSTALL_DIR/etc/vconsole.conf
+arch-chroot $INSTALL_DIR ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
+arch-chroot $INSTALL_DIR hwclock --systohc
+arch-chroot $INSTALL_DIR locale-gen
+cat << EOL > /etc/X11/xorg.conf.d/00-keyboard.conf
+Section "InputClass"
+        Identifier "system-keyboard"
+        MatchIsKeyboard "on"
+        Option "XkbLayout" "fr"
+        Option "XkbModel" "pc105"
+EndSection
 EOL
 
 # Grub installation
