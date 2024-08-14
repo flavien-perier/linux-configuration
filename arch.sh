@@ -88,10 +88,10 @@ arch-chroot $INSTALL_DIR groupadd sudo
 arch-chroot $INSTALL_DIR useradd -m $USERNAME
 arch-chroot $INSTALL_DIR usermod -a -G sudo $USERNAME
 curl -s https://sh.flavien.io/shell.sh | arch-chroot $INSTALL_DIR bash -
-yes "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd
+echo "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd
 
 # DE configuration
-arch-chroot $INSTALL_DIR pacman --noconfirm -Sy lightdm lightdm-gtk-greeter xfce4 xfce4-goodies
+arch-chroot $INSTALL_DIR pacman --noconfirm -Sy lightdm lightdm-gtk-greeter xfce4 xfce4-goodies xterm
 arch-chroot $INSTALL_DIR systemctl enable lightdm
 
 # Grub installation
