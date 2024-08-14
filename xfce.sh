@@ -85,10 +85,11 @@ apply_settings_terminal() {
     xfconf-query -n -c xfce4-terminal -p /background-darkness -t double -s 0.9
 
     xfconf-query -n -c xfce4-terminal -p /title-mode -t string -s "TERMINAL_TITLE_HIDE"
-    xfconf-query -n -c xfce4-terminal -p /title-mode -t int -s 999999
+    xfconf-query -n -c xfce4-terminal -p /scrolling-unlimited -t bool -s true
 
     if command_exists "tmux"
     then
+        xfconf-query -n -c xfce4-terminal -p /run-custom-command -t bool -s true
         xfconf-query -n -c xfce4-terminal -p /custom-command -t string -s "tmux"
         xfconf-query -n -c xfce4-terminal -p /scrolling-bar -t string -s "TERMINAL_SCROLLBAR_NONE"
     fi

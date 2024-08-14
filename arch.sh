@@ -8,8 +8,6 @@ set -x
 SCRIPT_TITLE="Arch configuration"
 INSTALL_DIR="/mnt"
 
-loadkeys fr
-
 if [ $# -eq 4 ]
 then
     HOSTNAME=$1
@@ -39,6 +37,7 @@ swapon ${DISK}2
 mount ${DISK}3 $INSTALL_DIR
 
 pacstrap $INSTALL_DIR base linux linux-firmware grub efibootmgr systemd networkmanager sudo pacman flatpak
+curl -s https://blackarch.org/strap.sh | arch-chroot $INSTALL_DIR su $USERNAME -
 
 echo "$HOSTNAME" > $INSTALL_DIR/etc/hostname
 
@@ -49,8 +48,6 @@ echo "KEYMAP=fr" > $INSTALL_DIR/etc/vconsole.conf
 arch-chroot $INSTALL_DIR ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
 arch-chroot $INSTALL_DIR hwclock --systohc
 arch-chroot $INSTALL_DIR locale-gen
-
-curl -s https://blackarch.org/strap.sh | arch-chroot $INSTALL_DIR bash -
 
 # Network configuration
 cat << EOL > $INSTALL_DIR/etc/hosts
@@ -127,11 +124,34 @@ arch-chroot $INSTALL_DIR systemctl enable lightdm
 # Aditional tools
 arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     tmux \
+    xclip \
     fastfetch \
     zip \
     unzip
 
+# Tmux configuration
+cat << EOL > ~/.tmux.conf
+set-option -g default-shell /usr/bin/fish
+set -g default-command /usr/bin/fish
 
+bind '"' split-window -c "#{pane_current_path}"
+bind % split-window -h -c "#{pane_current_path}"
+
+set -g status off
+set -g history-limit 999999999
+set -g mouse on
+
+setw -g mode-keys vi
+
+set-option -s set-clipboard off
+
+bind P paste-buffer
+bind-key -T copy-mode-vi v send-keys -X begin-selection
+bind-key -T copy-mode-vi y send-keys -X rectangle-toggle
+unbind -T copy-mode-vi Enter
+bind-key -T copy-mode-vi Enter send-keys -X copy-pipe-and-cancel 'xclip -se c -i'
+bind-key -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel 'xclip -se c -i'
+EOL
 
 # Grub installation
 arch-chroot $INSTALL_DIR grub-install ${DISK} --force
