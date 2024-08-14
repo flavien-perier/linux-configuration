@@ -8,6 +8,10 @@ set -x
 JETBRAINS_MONO_VERSION="2.304"
 SWEET_DARK_VERSION="5.0"
 
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
 backup_actual_configuration() {
     XFCE_BACKUP=$(mktemp -t xfce-XXXXXXX)
 
@@ -79,6 +83,15 @@ apply_settings_terminal() {
 
     xfconf-query -n -c xfce4-terminal -p /background-mode -t string -s "TERMINAL_BACKGROUND_TRANSPARENT"
     xfconf-query -n -c xfce4-terminal -p /background-darkness -t double -s 0.9
+
+    xfconf-query -n -c xfce4-terminal -p /title-mode -t string -s "TERMINAL_TITLE_HIDE"
+    xfconf-query -n -c xfce4-terminal -p /title-mode -t int -s 999999
+
+    if command_exists "tmux"
+    then
+        xfconf-query -n -c xfce4-terminal -p /custom-command -t string -s "tmux"
+        xfconf-query -n -c xfce4-terminal -p /scrolling-bar -t string -s "TERMINAL_SCROLLBAR_NONE"
+    fi
 }
 
 main() {
