@@ -91,8 +91,47 @@ curl -s https://sh.flavien.io/shell.sh | arch-chroot $INSTALL_DIR bash -
 echo "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd
 
 # DE configuration
-arch-chroot $INSTALL_DIR pacman --noconfirm -Sy lightdm lightdm-gtk-greeter xfce4 xfce4-goodies xterm
+arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
+    lightdm \
+    lightdm-gtk-greeter \
+    exo \
+    garcon \
+    libxfce4ui \
+    libxfce4util \
+    thunar \
+    thunar-archive-plugin \
+    thunar-media-tags-plugin \
+    thunar-volman \
+    tumbler \
+    xfce4-appfinder \
+    xfce4-battery-plugin \
+    xfce4-clipman-plugin \
+    xfce4-notifyd \
+    xfce4-panel \
+    xfce4-power-manager \
+    xfce4-pulseaudio-plugin \
+    xfce4-screenshooter \
+    xfce4-session \
+    xfce4-settings \
+    xfce4-taskmanager \
+    xfce4-terminal \
+    xfce4-whiskermenu-plugin \
+    xfce4-xkb-plugin \
+    xfconf \
+    xfdesktop \
+    xfwm4 \
+    xfwm4-themes \
+
 arch-chroot $INSTALL_DIR systemctl enable lightdm
+
+# Aditional tools
+arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
+    tmux \
+    fastfetch \
+    zip \
+    unzip
+
+
 
 # Grub installation
 arch-chroot $INSTALL_DIR grub-install ${DISK} --force

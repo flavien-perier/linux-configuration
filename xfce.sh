@@ -3,6 +3,7 @@
 # Configure XFCE
 
 set -e
+set -x
 
 JETBRAINS_MONO_VERSION="2.304"
 SWEET_DARK_VERSION="5.0"
@@ -12,12 +13,12 @@ backup_actual_configuration() {
 
     for CHANNEL in $(xfconf-query -l | sed -e "1d" -e "s/ //g")
     do
-        for PROPERTY in $(xfconf-query -c $CHANNEL -lv | tr -s " " | tr " " ";")
+        for PROPERTY in $(xfconf-query -n -c $CHANNEL -lv | tr -s " " | tr " " ";")
         do
             KEY="$(echo "$PROPERTY" | cut -f1 -d ";")"
             VALUE="$(echo "$PROPERTY" | cut -f2- -d ";" | tr ";" " ")"
 
-            echo "xfconf-query -c $CHANNEL -p $KEY -s \"$VALUE\"" >> $XFCE_BACKUP
+            echo "xfconf-query -n -c $CHANNEL -p $KEY -t string -s \"$VALUE\"" >> $XFCE_BACKUP
         done
     done
 
@@ -44,40 +45,40 @@ download_resources() {
     rm -Rf "$HOME/.themes"
     mkdir -p "$HOME/.themes"
     wget https://github.com/EliverLara/Sweet/releases/download/v$SWEET_DARK_VERSION/Sweet-Dark-v40.tar.xz \
-        -O "$TEMP_DIR/Sweet-Dark.tar.xz" "$HOME/.themes"
+        -O "$TEMP_DIR/Sweet-Dark.tar.xz"
     tar -xJf "$TEMP_DIR/Sweet-Dark.tar.xz" -C "$HOME/.themes"
 }
 
 apply_settings_fonts() {
-    xfconf-query -c xfce4-panel -p /plugins/plugin-5/digital-time-font -s "JetBrains Mono Bold 13"
-    xfconf-query -c xfce4-terminal -p /font-name -s "JetBrains Mono NL 15"
-    xfconf-query -c xfwm4 -p /general/title_font -s "JetBrains Mono NL Bold 14"
-    xfconf-query -c xsettings -p /Gtk/FontName -s "JetBrains Mono NL 13"
-    xfconf-query -c xsettings -p /Gtk/MonospaceFontName -s "JetBrains Mono NL Light 10"
+    xfconf-query -n -c xfce4-panel -p /plugins/plugin-5/digital-time-font -t string -s "JetBrains Mono Bold 13"
+    xfconf-query -n -c xfce4-terminal -p /font-name -t string -s "JetBrains Mono NL 15"
+    xfconf-query -n -c xfwm4 -p /general/title_font -t string -s "JetBrains Mono NL Bold 14"
+    xfconf-query -n -c xsettings -p /Gtk/FontName -t string -s "JetBrains Mono NL 13"
+    xfconf-query -n -c xsettings -p /Gtk/MonospaceFontName -t string -s "JetBrains Mono NL Light 10"
 }
 
 apply_settings_theme() {
-    xfconf-query -c xfwm4 -p /general/theme -s "Sweet-Dark-v40"
-    xfconf-query -c xsettings -p /Net/IconThemeName -s "Sweet-Rainbow"
-    xfconf-query -c xsettings -p /Net/ThemeName -s "Sweet-Dark-v40"
+    xfconf-query -n -c xfwm4 -p /general/theme -t string -s "Sweet-Dark-v40"
+    xfconf-query -n -c xsettings -p /Net/IconThemeName -t string -s "Sweet-Rainbow"
+    xfconf-query -n -c xsettings -p /Net/ThemeName -t string -s "Sweet-Dark-v40"
 }
 
 apply_settings_terminal() {
-    xfconf-query -c xfce4-terminal -p /tab-activity-color -s "#ff7f7f"
-    xfconf-query -c xfce4-terminal -p /color-foreground -s "#ffffff"
-    xfconf-query -c xfce4-terminal -p /color-background -s "#000000"
-    xfconf-query -c xfce4-terminal -p /color-bold -s "#ffffff"
-    xfconf-query -c xfce4-terminal -p /color-bold-use-default -s false
-    xfconf-query -c xfce4-terminal -p /color-cursor -s "#ffffff"
-    xfconf-query -c xfce4-terminal -p /color-cursor-foreground -s "#000000"
-    xfconf-query -c xfce4-terminal -p /color-cursor-use-default -s false
-    xfconf-query -c xfce4-terminal -p /color-selection -s "#000000"
-    xfconf-query -c xfce4-terminal -p /color-selection-background -s "#ffffff"
-    xfconf-query -c xfce4-terminal -p /color-selection-use-default -s false
-    xfconf-query -c xfce4-terminal -p /color-palette -s "#404040;#d04040;#40d040;#d0d040;#4040d0;#d040d0;#40d0d0;#d0d0d0;#7f7f7f;#ff7f7f;#7fff7f;#ffff7f;#7f7fff;#ff7fff;#7fffff;#ffffff"
+    xfconf-query -n -c xfce4-terminal -p /tab-activity-color -t string -s "#ff7f7f"
+    xfconf-query -n -c xfce4-terminal -p /color-foreground -t string -s "#ffffff"
+    xfconf-query -n -c xfce4-terminal -p /color-background -t string -s "#000000"
+    xfconf-query -n -c xfce4-terminal -p /color-bold -t string -s "#ffffff"
+    xfconf-query -n -c xfce4-terminal -p /color-bold-use-default -t bool -s false
+    xfconf-query -n -c xfce4-terminal -p /color-cursor -t string -s "#ffffff"
+    xfconf-query -n -c xfce4-terminal -p /color-cursor-foreground -t string -s "#000000"
+    xfconf-query -n -c xfce4-terminal -p /color-cursor-use-default -t bool -s false
+    xfconf-query -n -c xfce4-terminal -p /color-selection -t string -s "#000000"
+    xfconf-query -n -c xfce4-terminal -p /color-selection-background -t string -s "#ffffff"
+    xfconf-query -n -c xfce4-terminal -p /color-selection-use-default -t bool -s false
+    xfconf-query -n -c xfce4-terminal -p /color-palette -t string -s "#404040;#d04040;#40d040;#d0d040;#4040d0;#d040d0;#40d0d0;#d0d0d0;#7f7f7f;#ff7f7f;#7fff7f;#ffff7f;#7f7fff;#ff7fff;#7fffff;#ffffff"
 
-    xfconf-query -c xfce4-terminal -p /background-mode -s "TERMINAL_BACKGROUND_TRANSPARENT"
-    xfconf-query -c xfce4-terminal -p /background-darkness -s 0.9
+    xfconf-query -n -c xfce4-terminal -p /background-mode -t string -s "TERMINAL_BACKGROUND_TRANSPARENT"
+    xfconf-query -n -c xfce4-terminal -p /background-darkness -t double -s 0.9
 }
 
 main() {
