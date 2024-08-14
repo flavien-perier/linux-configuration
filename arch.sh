@@ -37,7 +37,6 @@ swapon ${DISK}2
 mount ${DISK}3 $INSTALL_DIR
 
 pacstrap $INSTALL_DIR base linux linux-firmware grub efibootmgr systemd networkmanager sudo pacman flatpak
-curl -s https://blackarch.org/strap.sh | arch-chroot bash -
 
 echo "$HOSTNAME" > $INSTALL_DIR/etc/hostname
 
@@ -112,6 +111,7 @@ arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     tmux \
     xclip \
     fastfetch \
+    inetutils \
     zip \
     unzip
 
@@ -128,7 +128,7 @@ echo "KEYMAP=fr" > $INSTALL_DIR/etc/vconsole.conf
 arch-chroot $INSTALL_DIR ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
 arch-chroot $INSTALL_DIR hwclock --systohc
 arch-chroot $INSTALL_DIR locale-gen
-cat << EOL > /etc/X11/xorg.conf.d/00-keyboard.conf
+cat << EOL > $INSTALL_DIR/etc/X11/xorg.conf.d/00-keyboard.conf
 Section "InputClass"
         Identifier "system-keyboard"
         MatchIsKeyboard "on"

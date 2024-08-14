@@ -29,6 +29,127 @@ backup_actual_configuration() {
     printf "Actual XFCE configuration is backup in : \033[0;36m$XFCE_BACKUP\033[0m\n"
 }
 
+print_xfce_pannel_configuration() {
+    echo '<?xml version="1.0" encoding="UTF-8"?>
+
+<channel name="xfce4-panel" version="1.0">
+  <property name="panels" type="array">
+    <value type="int" value="0"/>
+    <property name="panel-0" type="empty">
+      <property name="position" type="string" value="p=8;x=720;y=884"/>
+      <property name="length" type="uint" value="100"/>
+      <property name="position-locked" type="bool" value="true"/>
+      <property name="plugin-ids" type="array">
+        <value type="int" value="8"/>
+        <value type="int" value="3"/>
+        <value type="int" value="7"/>
+        <value type="int" value="6"/>
+        <value type="int" value="20"/>
+        <value type="int" value="9"/>
+        <value type="int" value="5"/>
+        <value type="int" value="15"/>
+      </property>
+      <property name="role" type="string" value="xfce4-panel-12965750720"/>
+      <property name="length-adjust" type="bool" value="true"/>
+      <property name="background-style" type="uint" value="0"/>
+      <property name="size" type="uint" value="45"/>
+      <property name="mode" type="uint" value="0"/>
+      <property name="autohide-behavior" type="uint" value="0"/>
+      <property name="icon-size" type="uint" value="27"/>
+      <property name="nrows" type="uint" value="1"/>
+      <property name="enter-opacity" type="uint" value="100"/>
+      <property name="leave-opacity" type="uint" value="100"/>
+      <property name="span-monitors" type="bool" value="true"/>
+      <property name="output-name" type="string" value="eDP-1"/>
+      <property name="background-rgba" type="array">
+        <value type="double" value="0"/>
+        <value type="double" value="0"/>
+        <value type="double" value="0"/>
+        <value type="double" value="1"/>
+      </property>
+      <property name="enable-struts" type="bool" value="true"/>
+    </property>
+    <property name="dark-mode" type="bool" value="false"/>
+  </property>
+  <property name="plugins" type="empty">
+    <property name="plugin-3" type="string" value="tasklist">
+      <property name="grouping" type="bool" value="false"/>
+      <property name="sort-order" type="uint" value="4"/>
+      <property name="show-handle" type="bool" value="false"/>
+      <property name="show-labels" type="bool" value="false"/>
+      <property name="middle-click" type="uint" value="1"/>
+      <property name="flat-buttons" type="bool" value="true"/>
+      <property name="include-all-monitors" type="bool" value="true"/>
+      <property name="show-only-minimized" type="bool" value="false"/>
+      <property name="show-tooltips" type="bool" value="false"/>
+      <property name="show-wireframes" type="bool" value="false"/>
+      <property name="window-scrolling" type="bool" value="false"/>
+    </property>
+    <property name="plugin-7" type="string" value="separator">
+      <property name="expand" type="bool" value="true"/>
+      <property name="style" type="uint" value="0"/>
+    </property>
+    <property name="plugin-9" type="string" value="pulseaudio">
+      <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
+    </property>
+    <property name="plugin-8" type="string" value="whiskermenu">
+      <property name="button-icon" type="string" value="/home/flavien/.icons/manjaro.png"/>
+      <property name="button-single-row" type="bool" value="true"/>
+      <property name="launcher-show-description" type="bool" value="false"/>
+      <property name="launcher-show-tooltip" type="bool" value="false"/>
+      <property name="launcher-icon-size" type="int" value="3"/>
+      <property name="category-icon-size" type="int" value="2"/>
+      <property name="sort-categories" type="bool" value="false"/>
+      <property name="recent-items-max" type="int" value="0"/>
+      <property name="favorites-in-recent" type="bool" value="true"/>
+      <property name="menu-width" type="int" value="696"/>
+      <property name="menu-height" type="int" value="725"/>
+      <property name="menu-opacity" type="int" value="95"/>
+      <property name="show-command-lockscreen" type="bool" value="false"/>
+      <property name="command-switchuser" type="string" value="dm-tool switch-to-greeter"/>
+      <property name="show-command-restart" type="bool" value="true"/>
+      <property name="show-command-shutdown" type="bool" value="true"/>
+      <property name="show-command-logout" type="bool" value="false"/>
+      <property name="favorites" type="array"></property>
+      <property name="recent" type="array">
+      </property>
+    </property>
+    <property name="plugin-5" type="string" value="clock">
+      <property name="mode" type="uint" value="2"/>
+      <property name="tooltip-format" type="string" value="%x"/>
+      <property name="digital-format" type="string" value="%Y-%m-%d &lt;b&gt;%H:%M&lt;/b&gt; "/>
+      <property name="timezone" type="string" value=""/>
+      <property name="show-seconds" type="bool" value="false"/>
+      <property name="digital-time-format" type="string" value=" %Y-%m-%d &lt;b&gt;%H:%M&lt;/b&gt;"/>
+      <property name="digital-layout" type="uint" value="3"/>
+      <property name="digital-time-font" type="string" value="JetBrains Mono Bold 13"/>
+    </property>
+    <property name="clipman" type="empty">
+      <property name="tweaks" type="empty">
+        <property name="never-confirm-history-clear" type="bool" value="true"/>
+      </property>
+      <property name="settings" type="empty">
+        <property name="save-on-quit" type="bool" value="false"/>
+        <property name="max-texts-in-history" type="uint" value="5"/>
+      </property>
+    </property>
+    <property name="plugin-20" type="string" value="power-manager-plugin"/>
+    <property name="plugin-6" type="string" value="systray">
+      <property name="single-row" type="bool" value="true"/>
+      <property name="hide-new-items" type="bool" value="false"/>
+      <property name="square-icons" type="bool" value="true"/>
+      <property name="icon-size" type="int" value="0"/>
+      <property name="menu-is-primary" type="bool" value="false"/>
+      <property name="symbolic-icons" type="bool" value="false"/>
+    </property>
+    <property name="plugin-15" type="string" value="separator">
+      <property name="style" type="uint" value="0"/>
+    </property>
+  </property>
+  <property name="configver" type="int" value="2"/>
+</channel>'
+}
+
 print_tmux_conf() {
     cat << EOL
 set-option -g default-shell /usr/bin/fish
@@ -128,6 +249,9 @@ main() {
     apply_settings_fonts
     apply_settings_theme
     apply_settings_terminal
+
+    mkdir -p $HOME/.config/xfce4/xfconf/xfce-perchannel-xml
+    print_xfce_pannel_configuration > $HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
 }
 
 main
