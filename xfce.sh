@@ -93,7 +93,7 @@ print_xfce_pannel_configuration() {
       <property name="enable-keyboard-shortcuts" type="bool" value="true"/>
     </property>
     <property name="plugin-8" type="string" value="whiskermenu">
-      <property name="button-icon" type="string" value="/home/flavien/.icons/manjaro.png"/>
+      <property name="button-icon" type="string" value="/home/flavien/.icons/logo.png"/>
       <property name="button-single-row" type="bool" value="true"/>
       <property name="launcher-show-description" type="bool" value="false"/>
       <property name="launcher-show-tooltip" type="bool" value="false"/>
@@ -178,25 +178,43 @@ EOL
 download_resources() {
     TEMP_DIR=`mktemp -d`
 
+    # Fonts
     rm -Rf "$HOME/.fonts"
     mkdir -p "$HOME/.fonts"
+
     wget https://github.com/JetBrains/JetBrainsMono/releases/download/v$JETBRAINS_MONO_VERSION/JetBrainsMono-$JETBRAINS_MONO_VERSION.zip \
         -O "$TEMP_DIR/JetBrainsMono.zip"
     unzip -j "$TEMP_DIR/JetBrainsMono.zip" -d "$HOME/.fonts" fonts/ttf/*.ttf
 
+    # Icons
     rm -Rf "$HOME/.icons"
     mkdir -p "$HOME/.icons"
+
     wget https://github.com/EliverLara/Sweet-folders/archive/refs/heads/master.zip \
         -O "$TEMP_DIR/Sweet-icon.zip"
     unzip "$TEMP_DIR/Sweet-icon.zip" -d "$HOME/.icons" Sweet-folders-master/Sweet-Rainbow/*
     mv $HOME/.icons/Sweet-folders-master/Sweet-Rainbow $HOME/.icons/Sweet-Rainbow
     rmdir $HOME/.icons/Sweet-folders-master
 
+    wget https://github.com/PapirusDevelopmentTeam/papirus-icon-theme/archive/refs/heads/master.zip \
+        -O "$TEMP_DIR/papirus.zip"
+    unzip "$TEMP_DIR/papirus.zip" -d "$HOME/.icons" papirus-icon-theme-master/Papirus/*
+    mv $HOME/.icons/papirus-icon-theme-master/Papirus $HOME/.icons/Papirus
+    rmdir $HOME/.icons/papirus-icon-theme-master
+
+    # Themes
     rm -Rf "$HOME/.themes"
     mkdir -p "$HOME/.themes"
+
     wget https://github.com/EliverLara/Sweet/releases/download/v$SWEET_DARK_VERSION/Sweet-Dark-v40.tar.xz \
         -O "$TEMP_DIR/Sweet-Dark.tar.xz"
     tar -xJf "$TEMP_DIR/Sweet-Dark.tar.xz" -C "$HOME/.themes"
+}
+
+apply_settings_theme() {
+    xfconf-query -n -c xfwm4 -p /general/theme -t string -s "Sweet-Dark-v40"
+    xfconf-query -n -c xsettings -p /Net/IconThemeName -t string -s "Sweet-Rainbow"
+    xfconf-query -n -c xsettings -p /Net/ThemeName -t string -s "Sweet-Dark-v40"
 }
 
 apply_settings_fonts() {
@@ -205,12 +223,6 @@ apply_settings_fonts() {
     xfconf-query -n -c xfwm4 -p /general/title_font -t string -s "JetBrains Mono NL Bold 14"
     xfconf-query -n -c xsettings -p /Gtk/FontName -t string -s "JetBrains Mono NL 13"
     xfconf-query -n -c xsettings -p /Gtk/MonospaceFontName -t string -s "JetBrains Mono NL Light 10"
-}
-
-apply_settings_theme() {
-    xfconf-query -n -c xfwm4 -p /general/theme -t string -s "Sweet-Dark-v40"
-    xfconf-query -n -c xsettings -p /Net/IconThemeName -t string -s "Sweet-Rainbow"
-    xfconf-query -n -c xsettings -p /Net/ThemeName -t string -s "Sweet-Dark-v40"
 }
 
 apply_settings_terminal() {
@@ -243,15 +255,18 @@ apply_settings_terminal() {
     fi
 }
 
+apply_settings_panel() {
+    mkdir -p $HOME/.config/xfce4/xfconf/xfce-perchannel-xml
+    print_xfce_pannel_configuration > $HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+}
+
 main() {
     download_resources
 
-    apply_settings_fonts
     apply_settings_theme
+    apply_settings_fonts
     apply_settings_terminal
-
-    mkdir -p $HOME/.config/xfce4/xfconf/xfce-perchannel-xml
-    print_xfce_pannel_configuration > $HOME/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+    apply_settings_panel
 }
 
 main
