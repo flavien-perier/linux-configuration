@@ -176,39 +176,52 @@ EOL
 }
 
 download_resources() {
-    TEMP_DIR=`mktemp -d`
+    local TEMP_DIR=`mktemp -d /tmp/xfce.XXXXXXXXXX`
+    local FONTS_DIR="$HOME/.fonts"
+    local ICONS_DIR="$HOME/.icons"
+    local THEMES_DIR="$HOME/.themes"
 
     # Fonts
-    rm -Rf "$HOME/.fonts"
-    mkdir -p "$HOME/.fonts"
+    chmod -R 700 $FONTS_DIR
+    rm -Rf $FONTS_DIR
+    mkdir -p $FONTS_DIR
 
-    wget https://github.com/JetBrains/JetBrainsMono/releases/download/v$JETBRAINS_MONO_VERSION/JetBrainsMono-$JETBRAINS_MONO_VERSION.zip \
+    wget https://github.com/JetBrains/JetBrainsMono/archive/refs/heads/master.zip \
         -O "$TEMP_DIR/JetBrainsMono.zip"
-    unzip -j "$TEMP_DIR/JetBrainsMono.zip" -d "$HOME/.fonts" fonts/ttf/*.ttf
+    unzip -j "$TEMP_DIR/JetBrainsMono.zip" -d $FONTS_DIR JetBrainsMono-master/fonts/ttf/*.ttf
 
     # Icons
-    rm -Rf "$HOME/.icons"
-    mkdir -p "$HOME/.icons"
+    chmod -R 700 $ICONS_DIR
+    rm -Rf $ICONS_DIR
+    mkdir -p $ICONS_DIR
 
     wget https://github.com/EliverLara/Sweet-folders/archive/refs/heads/master.zip \
         -O "$TEMP_DIR/Sweet-icon.zip"
-    unzip "$TEMP_DIR/Sweet-icon.zip" -d "$HOME/.icons" Sweet-folders-master/Sweet-Rainbow/*
-    mv $HOME/.icons/Sweet-folders-master/Sweet-Rainbow $HOME/.icons/Sweet-Rainbow
-    rmdir $HOME/.icons/Sweet-folders-master
+    unzip "$TEMP_DIR/Sweet-icon.zip" -d $ICONS_DIR Sweet-folders-master/Sweet-Rainbow/*
+    mv $ICONS_DIR/Sweet-folders-master/Sweet-Rainbow $ICONS_DIR/Sweet-Rainbow
+    rmdir $ICONS_DIR/Sweet-folders-master
 
     wget https://github.com/PapirusDevelopmentTeam/papirus-icon-theme/archive/refs/heads/master.zip \
         -O "$TEMP_DIR/papirus.zip"
-    unzip "$TEMP_DIR/papirus.zip" -d "$HOME/.icons" papirus-icon-theme-master/Papirus/*
-    mv $HOME/.icons/papirus-icon-theme-master/Papirus $HOME/.icons/Papirus
-    rmdir $HOME/.icons/papirus-icon-theme-master
+    unzip "$TEMP_DIR/papirus.zip" -d $ICONS_DIR papirus-icon-theme-master/Papirus/*
+    unzip "$TEMP_DIR/papirus.zip" -d $ICONS_DIR papirus-icon-theme-master/Papirus-Dark/*
+    mv $ICONS_DIR/papirus-icon-theme-master/Papirus $ICONS_DIR/Papirus-Dark
+    cp -rn $ICONS_DIR/papirus-icon-theme-master/Papirus-Dark/* $ICONS_DIR/Papirus-Dark
+    rm -Rf $ICONS_DIR/papirus-icon-theme-master
+
+    sed -i "s/Inherits=.*/Inherits=Papirus-Dark/g" $ICONS_DIR/Sweet-Rainbow/index.theme
 
     # Themes
-    rm -Rf "$HOME/.themes"
-    mkdir -p "$HOME/.themes"
+    chmod -R 700 $THEMES_DIR
+    rm -Rf $THEMES_DIR
+    mkdir -p $THEMES_DIR
 
     wget https://github.com/EliverLara/Sweet/releases/download/v$SWEET_DARK_VERSION/Sweet-Dark-v40.tar.xz \
         -O "$TEMP_DIR/Sweet-Dark.tar.xz"
-    tar -xJf "$TEMP_DIR/Sweet-Dark.tar.xz" -C "$HOME/.themes"
+    tar -xJf "$TEMP_DIR/Sweet-Dark.tar.xz" -C $THEMES_DIR
+
+    # Clean after
+    rm -Rf $TEMP_DIR
 }
 
 apply_settings_theme() {
