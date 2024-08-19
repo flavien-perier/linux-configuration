@@ -213,7 +213,7 @@ download_resources() {
         -O "$TEMP_DIR/breeze.zip"
     unzip -qq "$TEMP_DIR/breeze.zip" -d $ICONS_DIR breeze-master/cursors/Breeze/Breeze/*
     mv $ICONS_DIR/breeze-master/cursors/Breeze/Breeze $ICONS_DIR/Breeze
-    rm -Rf $ICONS_DIR/Breeze
+    rm -Rf $ICONS_DIR/breeze-master
 
     sed -i "s/Inherits=.*/Inherits=Papirus-Dark/g" $ICONS_DIR/Sweet-Rainbow/index.theme
 
