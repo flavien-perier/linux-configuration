@@ -181,6 +181,8 @@ download_resources() {
     local ICONS_DIR="$HOME/.icons"
     local THEMES_DIR="$HOME/.themes"
 
+    local GITHUB_PROJECT_BASE_URL="https://raw.githubusercontent.com/flavien-perier/linux-configuration/master"
+
     # Fonts
     chmod -R 700 $FONTS_DIR || echo "No fonts dir"
     rm -Rf $FONTS_DIR
@@ -206,7 +208,7 @@ download_resources() {
     unzip -qq "$TEMP_DIR/papirus.zip" -d $ICONS_DIR papirus-icon-theme-master/Papirus/*
     unzip -qq "$TEMP_DIR/papirus.zip" -d $ICONS_DIR papirus-icon-theme-master/Papirus-Dark/*
     mv $ICONS_DIR/papirus-icon-theme-master/Papirus $ICONS_DIR/Papirus-Dark
-    cp -rn $ICONS_DIR/papirus-icon-theme-master/Papirus-Dark/* $ICONS_DIR/Papirus-Dark
+    cp -rf $ICONS_DIR/papirus-icon-theme-master/Papirus-Dark/* $ICONS_DIR/Papirus-Dark
     rm -Rf $ICONS_DIR/papirus-icon-theme-master
 
     wget https://github.com/KDE/breeze/archive/refs/heads/master.zip \
@@ -216,6 +218,9 @@ download_resources() {
     rm -Rf $ICONS_DIR/breeze-master
 
     sed -i "s/Inherits=.*/Inherits=Papirus-Dark/g" $ICONS_DIR/Sweet-Rainbow/index.theme
+
+    wget $GITHUB_PROJECT_BASE_URL/icons/flavien.png -O $ICONS_DIR/flavien.png
+    wget $GITHUB_PROJECT_BASE_URL/icons/manjaro.png -O $ICONS_DIR/manjaro.png
 
     # Themes
     chmod -R 700 $THEMES_DIR || echo "No themes dir"
