@@ -17,7 +17,7 @@ backup_actual_configuration() {
 
     for CHANNEL in $(xfconf-query -l | sed -e "1d" -e "s/ //g")
     do
-        for PROPERTY in $(xfconf-query -n -c $CHANNEL -lv | tr -s " " | tr " " ";")
+        for PROPERTY in $(xfconf-query -c $CHANNEL -lv | tr -s " " | tr " " ";")
         do
             KEY="$(echo "$PROPERTY" | cut -f1 -d ";")"
             VALUE="$(echo "$PROPERTY" | cut -f2- -d ";" | tr ";" " ")"
@@ -182,37 +182,43 @@ download_resources() {
     local THEMES_DIR="$HOME/.themes"
 
     # Fonts
-    chmod -R 700 $FONTS_DIR
+    chmod -R 700 $FONTS_DIR || echo "No fonts dir"
     rm -Rf $FONTS_DIR
     mkdir -p $FONTS_DIR
 
     wget https://github.com/JetBrains/JetBrainsMono/archive/refs/heads/master.zip \
         -O "$TEMP_DIR/JetBrainsMono.zip"
-    unzip -j "$TEMP_DIR/JetBrainsMono.zip" -d $FONTS_DIR JetBrainsMono-master/fonts/ttf/*.ttf
+    unzip -qq -j "$TEMP_DIR/JetBrainsMono.zip" -d $FONTS_DIR JetBrainsMono-master/fonts/ttf/*.ttf
 
     # Icons
-    chmod -R 700 $ICONS_DIR
+    chmod -R 700 $ICONS_DIR || echo "No icons dir"
     rm -Rf $ICONS_DIR
     mkdir -p $ICONS_DIR
 
     wget https://github.com/EliverLara/Sweet-folders/archive/refs/heads/master.zip \
         -O "$TEMP_DIR/Sweet-icon.zip"
-    unzip "$TEMP_DIR/Sweet-icon.zip" -d $ICONS_DIR Sweet-folders-master/Sweet-Rainbow/*
+    unzip -qq "$TEMP_DIR/Sweet-icon.zip" -d $ICONS_DIR Sweet-folders-master/Sweet-Rainbow/*
     mv $ICONS_DIR/Sweet-folders-master/Sweet-Rainbow $ICONS_DIR/Sweet-Rainbow
     rmdir $ICONS_DIR/Sweet-folders-master
 
     wget https://github.com/PapirusDevelopmentTeam/papirus-icon-theme/archive/refs/heads/master.zip \
         -O "$TEMP_DIR/papirus.zip"
-    unzip "$TEMP_DIR/papirus.zip" -d $ICONS_DIR papirus-icon-theme-master/Papirus/*
-    unzip "$TEMP_DIR/papirus.zip" -d $ICONS_DIR papirus-icon-theme-master/Papirus-Dark/*
+    unzip -qq "$TEMP_DIR/papirus.zip" -d $ICONS_DIR papirus-icon-theme-master/Papirus/*
+    unzip -qq "$TEMP_DIR/papirus.zip" -d $ICONS_DIR papirus-icon-theme-master/Papirus-Dark/*
     mv $ICONS_DIR/papirus-icon-theme-master/Papirus $ICONS_DIR/Papirus-Dark
     cp -rn $ICONS_DIR/papirus-icon-theme-master/Papirus-Dark/* $ICONS_DIR/Papirus-Dark
     rm -Rf $ICONS_DIR/papirus-icon-theme-master
 
+    wget https://github.com/KDE/breeze/archive/refs/heads/master.zip \
+        -O "$TEMP_DIR/breeze.zip"
+    unzip -qq "$TEMP_DIR/breeze.zip" -d $ICONS_DIR breeze-master/cursors/Breeze/Breeze/*
+    mv $ICONS_DIR/breeze-master/cursors/Breeze/Breeze $ICONS_DIR/Breeze
+    rm -Rf $ICONS_DIR/Breeze
+
     sed -i "s/Inherits=.*/Inherits=Papirus-Dark/g" $ICONS_DIR/Sweet-Rainbow/index.theme
 
     # Themes
-    chmod -R 700 $THEMES_DIR
+    chmod -R 700 $THEMES_DIR || echo "No themes dir"
     rm -Rf $THEMES_DIR
     mkdir -p $THEMES_DIR
 
@@ -226,11 +232,10 @@ download_resources() {
 
 apply_settings_theme() {
     xfconf-query -n -c xfwm4 -p /general/theme -t string -s "Sweet-Dark-v40"
-    xfconf-query -n -c xsettings -p /Net/IconThemeName -t string -s "Sweet-Rainbow"
     xfconf-query -n -c xsettings -p /Net/ThemeName -t string -s "Sweet-Dark-v40"
-}
+    xfconf-query -n -c xsettings -p /Net/IconThemeName -t string -s "Sweet-Rainbow"
+    xfconf-query -n -c xsettings -p /Gtk/CursorThemeName -t string -s "Breeze"
 
-apply_settings_fonts() {
     xfconf-query -n -c xfce4-panel -p /plugins/plugin-5/digital-time-font -t string -s "JetBrains Mono Bold 13"
     xfconf-query -n -c xfce4-terminal -p /font-name -t string -s "JetBrains Mono NL 15"
     xfconf-query -n -c xfwm4 -p /general/title_font -t string -s "JetBrains Mono NL Bold 14"
@@ -277,7 +282,6 @@ main() {
     download_resources
 
     apply_settings_theme
-    apply_settings_fonts
     apply_settings_terminal
     apply_settings_panel
 }
