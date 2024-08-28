@@ -218,7 +218,6 @@ download_resources() {
     rm -Rf $ICONS_DIR/breeze-master
 
     sed -i "s/Inherits=.*/Inherits=Papirus-Dark/g" $ICONS_DIR/Sweet-Rainbow/index.theme
-    sed -i "s/Inherits=.*/Inherits=Papirus/g" $ICONS_DIR/Papirus-Dark/index.theme
 
     gtk-update-icon-cache $ICONS_DIR/Papirus/
     gtk-update-icon-cache $ICONS_DIR/Papirus-Dark/
