@@ -207,8 +207,8 @@ download_resources() {
         -O "$TEMP_DIR/papirus.zip"
     unzip -qq "$TEMP_DIR/papirus.zip" -d $ICONS_DIR papirus-icon-theme-master/Papirus/*
     unzip -qq "$TEMP_DIR/papirus.zip" -d $ICONS_DIR papirus-icon-theme-master/Papirus-Dark/*
-    mv $ICONS_DIR/papirus-icon-theme-master/Papirus $ICONS_DIR/Papirus-Dark
-    cp -rf $ICONS_DIR/papirus-icon-theme-master/Papirus-Dark/* $ICONS_DIR/Papirus-Dark
+    mv $ICONS_DIR/papirus-icon-theme-master/Papirus $ICONS_DIR/Papirus
+    mv $ICONS_DIR/papirus-icon-theme-master/Papirus-Dark/ $ICONS_DIR/Papirus-Dark
     rm -Rf $ICONS_DIR/papirus-icon-theme-master
 
     wget https://github.com/KDE/breeze/archive/refs/heads/master.zip \
@@ -218,6 +218,11 @@ download_resources() {
     rm -Rf $ICONS_DIR/breeze-master
 
     sed -i "s/Inherits=.*/Inherits=Papirus-Dark/g" $ICONS_DIR/Sweet-Rainbow/index.theme
+    sed -i "s/Inherits=.*/Inherits=Papirus/g" $ICONS_DIR/Papirus-Dark/index.theme
+
+    gtk-update-icon-cache $ICONS_DIR/Papirus/
+    gtk-update-icon-cache $ICONS_DIR/Papirus-Dark/
+    gtk-update-icon-cache $ICONS_DIR/Sweet-Rainbow/
 
     wget $GITHUB_PROJECT_BASE_URL/icons/flavien.png -O $ICONS_DIR/flavien.png
     wget $GITHUB_PROJECT_BASE_URL/icons/manjaro.png -O $ICONS_DIR/manjaro.png
@@ -230,6 +235,14 @@ download_resources() {
     wget https://github.com/EliverLara/Sweet/releases/download/v$SWEET_DARK_VERSION/Sweet-Dark-v40.tar.xz \
         -O "$TEMP_DIR/Sweet-Dark.tar.xz"
     tar -xJf "$TEMP_DIR/Sweet-Dark.tar.xz" -C $THEMES_DIR
+
+    # Chown after
+    find $FONTS_DIR -type f -exec chmod 400 {} \;
+    find $FONTS_DIR -type d -exec chmod 500 {} \;
+    find $ICONS_DIR -type f -exec chmod 400 {} \;
+    find $ICONS_DIR -type d -exec chmod 500 {} \;
+    find $THEMES_DIR -type f -exec chmod 400 {} \;
+    find $THEMES_DIR -type d -exec chmod 500 {} \;
 
     # Clean after
     rm -Rf $TEMP_DIR
@@ -267,6 +280,7 @@ apply_settings_terminal() {
 
     xfconf-query -n -c xfce4-terminal -p /title-mode -t string -s "TERMINAL_TITLE_HIDE"
     xfconf-query -n -c xfce4-terminal -p /scrolling-unlimited -t bool -s true
+    xfconf-query -n -c xfce4-terminal -p /misc-menubar-default -t bool -s false
 
     if command_exists "tmux"
     then
@@ -288,7 +302,7 @@ main() {
 
     apply_settings_theme
     apply_settings_terminal
-    apply_settings_panel
+    # apply_settings_panel
 }
 
 main
