@@ -68,11 +68,27 @@ mkdir -p $INSTALL_DIR/boot/efi
 arch-chroot $INSTALL_DIR mount ${DISK}1 /boot/efi
 genfstab -U $INSTALL_DIR >> $INSTALL_DIR/etc/fstab
 
+# Local configuration
+echo "fr_FR.UTF-8 UTF-8" > $INSTALL_DIR/etc/locale.gen
+echo "LANG=fr_FR.UTF-8" > $INSTALL_DIR/etc/locale.conf
+echo "KEYMAP=fr" > $INSTALL_DIR/etc/vconsole.conf
+arch-chroot $INSTALL_DIR ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
+arch-chroot $INSTALL_DIR hwclock --systohc
+arch-chroot $INSTALL_DIR locale-gen
+cat << EOL > $INSTALL_DIR/etc/X11/xorg.conf.d/00-keyboard.conf
+Section "InputClass"
+        Identifier "system-keyboard"
+        MatchIsKeyboard "on"
+        Option "XkbLayout" "fr"
+        Option "XkbModel" "pc105"
+EndSection
+EOL
+
 # Sudo configuration
 echo "%sudo	ALL=(ALL:ALL) ALL" >> $INSTALL_DIR/etc/sudoers
 arch-chroot $INSTALL_DIR groupadd sudo
 
-# DE configuration
+# DE installation
 arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     lightdm \
     lightdm-gtk-greeter \
@@ -106,7 +122,7 @@ arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
 
 arch-chroot $INSTALL_DIR systemctl enable lightdm
 
-# Aditional tools
+# Aditional tools installation
 arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     tmux \
     xclip \
@@ -121,21 +137,14 @@ arch-chroot $INSTALL_DIR usermod -a -G sudo $USERNAME
 curl -s https://sh.flavien.io/shell.sh | arch-chroot $INSTALL_DIR bash -
 echo "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd
 
-# Local configuration
-echo "fr_FR.UTF-8 UTF-8" > $INSTALL_DIR/etc/locale.gen
-echo "LANG=fr_FR.UTF-8" > $INSTALL_DIR/etc/locale.conf
-echo "KEYMAP=fr" > $INSTALL_DIR/etc/vconsole.conf
-arch-chroot $INSTALL_DIR ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
-arch-chroot $INSTALL_DIR hwclock --systohc
-arch-chroot $INSTALL_DIR locale-gen
-cat << EOL > $INSTALL_DIR/etc/X11/xorg.conf.d/00-keyboard.conf
-Section "InputClass"
-        Identifier "system-keyboard"
-        MatchIsKeyboard "on"
-        Option "XkbLayout" "fr"
-        Option "XkbModel" "pc105"
-EndSection
-EOL
+# Flatpak tools installation
+arch-chroot -u $USERNAME $INSTALL_DIR flatpak remote-add --user flathub https://flathub.org/repo/flathub.flatpakrepo
+arch-chroot -u $USERNAME $INSTALL_DIR flatpak install -y --user org.mozilla.firefox
+arch-chroot -u $USERNAME $INSTALL_DIR flatpak install -y --user org.libreoffice.LibreOffice
+arch-chroot -u $USERNAME $INSTALL_DIR flatpak install -y --user org.videolan.VLC
+arch-chroot -u $USERNAME $INSTALL_DIR flatpak install -y --user org.gnome.eog
+arch-chroot -u $USERNAME $INSTALL_DIR flatpak install -y --user org.gimp.GIMP
+arch-chroot -u $USERNAME $INSTALL_DIR flatpak install -y --user org.keepassxc.KeePassXC
 
 # Grub installation
 arch-chroot $INSTALL_DIR grub-install ${DISK} --force
