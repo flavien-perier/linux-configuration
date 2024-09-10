@@ -140,12 +140,6 @@ echo "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd
 
 # Flatpak tools installation
 arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak remote-add --user flathub https://flathub.org/repo/flathub.flatpakrepo"
-arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak install -y --user org.mozilla.firefox"
-arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak install -y --user org.libreoffice.LibreOffice"
-arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak install -y --user org.videolan.VLC"
-arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak install -y --user org.gnome.eog"
-arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak install -y --user org.gimp.GIMP"
-arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak install -y --user org.keepassxc.KeePassXC"
 
 # Grub installation
 arch-chroot $INSTALL_DIR grub-install ${DISK} --force
