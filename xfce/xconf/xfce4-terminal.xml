@@ -15,7 +15,7 @@
   <property name="color-selection-use-default" type="bool" value="false"/>
   <property name="color-palette" type="string" value="#404040;#d04040;#40d040;#d0d040;#4040d0;#d040d0;#40d0d0;#d0d0d0;#7f7f7f;#ff7f7f;#7fff7f;#ffff7f;#7f7fff;#ff7fff;#7fffff;#ffffff"/>
   <property name="background-mode" type="string" value="TERMINAL_BACKGROUND_TRANSPARENT"/>
-  <property name="background-darkness" type="double" value="0.90000000000000002"/>
+  <property name="background-darkness" type="double" value="0.90"/>
   <property name="title-mode" type="string" value="TERMINAL_TITLE_HIDE"/>
   <property name="scrolling-unlimited" type="bool" value="true"/>
   <property name="misc-menubar-default" type="bool" value="false"/>

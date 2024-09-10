@@ -15,7 +15,7 @@ command_exists() {
 }
 
 download_resources() {
-    HOME_DIR=$1
+    local HOME_DIR=$1
 
     local TEMP_DIR=`mktemp -d /tmp/xfce.XXXXXXXXXX`
     local FONTS_DIR="$HOME_DIR/.fonts"
@@ -86,18 +86,24 @@ download_resources() {
     rm -Rf $TEMP_DIR
 }
 
-apply_settings() {
-    HOME_DIR=$1
-
-    local CONF_DIR="$HOME_DIR/.config/xfce4/xfconf/xfce-perchannel-xml"
+apply_xfce_settings() {
+    local CONF_DIR=$1
 
     mkdir -p $CONF_DIR
-    curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfce4-desktop.xml > $CONF_DIR/xfce4-desktop.xml
     curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfce4-keyboard-shortcuts.xml > $CONF_DIR/xfce4-keyboard-shortcuts.xml
     curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfce4-panel.xml > $CONF_DIR/xfce4-panel.xml
     curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfce4-terminal.xml > $CONF_DIR/xfce4-terminal.xml
     curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfwm4.xml > $CONF_DIR/xfwm4.xml
     curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xsettings.xml > $CONF_DIR/xsettings.xml
+
+    if ! command_exists "tmux"
+    then
+        # TODO: remove tmux conf in terminal 
+    fi
+}
+
+apply_tmux_settings() {
+    local HOME_DIR=$1
 
     if command_exists "tmux"
     then
@@ -106,8 +112,11 @@ apply_settings() {
 }
 
 main() {
+    local CONF_DIR="$HOME/.config/xfce4/xfconf/xfce-perchannel-xml"
+
     download_resources $HOME
-    apply_settings $HOME
+    apply_xfce_settings $CONF_DIR
+    apply_tmux_settings $HOME
 }
 
 main
