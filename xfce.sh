@@ -98,6 +98,7 @@ apply_xfce_settings() {
 
     if ! command_exists "tmux"
     then
+        echo "TODO"
         # TODO: remove tmux conf in terminal 
     fi
 }
