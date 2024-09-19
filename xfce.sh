@@ -3,7 +3,6 @@
 # Configure XFCE
 
 set -e
-set -x
 
 JETBRAINS_MONO_VERSION="2.304"
 SWEET_DARK_VERSION="5.0"
@@ -58,9 +57,9 @@ download_resources() {
 
     sed -i "s/Inherits=.*/Inherits=Papirus-Dark/g" $ICONS_DIR/Sweet-Rainbow/index.theme
 
-    gtk-update-icon-cache $ICONS_DIR/Papirus/
-    gtk-update-icon-cache $ICONS_DIR/Papirus-Dark/
-    gtk-update-icon-cache $ICONS_DIR/Sweet-Rainbow/
+    gtk-update-icon-cache $ICONS_DIR/Papirus/ || echo "Papirus theme optimisation failed"
+    gtk-update-icon-cache $ICONS_DIR/Papirus-Dark/ || echo "Papirus-Dark theme optimisation failed"
+    gtk-update-icon-cache $ICONS_DIR/Sweet-Rainbow/ || echo "Sweet-Rainbow theme optimisation failed"
 
     wget $GITHUB_PROJECT_BASE_URL/xfce/icons/flavien.png -O $ICONS_DIR/flavien.png
     wget $GITHUB_PROJECT_BASE_URL/xfce/icons/manjaro.png -O $ICONS_DIR/manjaro.png
@@ -89,7 +88,6 @@ download_resources() {
 apply_xfce_settings() {
     local CONF_DIR=$1
 
-    mkdir -p $CONF_DIR
     curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfce4-keyboard-shortcuts.xml > $CONF_DIR/xfce4-keyboard-shortcuts.xml
     curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfce4-panel.xml > $CONF_DIR/xfce4-panel.xml
     curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfce4-terminal.xml > $CONF_DIR/xfce4-terminal.xml
@@ -98,8 +96,10 @@ apply_xfce_settings() {
 
     if ! command_exists "tmux"
     then
-        echo "TODO"
-        # TODO: remove tmux conf in terminal 
+        sed -i \
+            -e 's|<property name="run-custom-command" type="bool" value="true"/>|<property name="run-custom-command" type="bool" value="false"/>|g' \
+            -e 's|<property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_NONE"/>|<property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_RIGHT"/>|g'\
+            $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfce4-terminal.xml
     fi
 }
 
@@ -113,11 +113,20 @@ apply_tmux_settings() {
 }
 
 main() {
-    local CONF_DIR="$HOME/.config/xfce4/xfconf/xfce-perchannel-xml"
+    command_exists "wget" || (echo "wget not found" && exit 1)
+    command_exists "curl" || (echo "curl not found" && exit 1)
+    command_exists "unzip" || (echo "unzip not found" && exit 1)
+    command_exists "xz" || (echo "xz not found" && exit 1)
 
-    download_resources $HOME
+    local HOME_DIR=${1:-"$HOME"}
+    local CONF_DIR=${2:-"$HOME_DIR/.config/xfce4/xfconf/xfce-perchannel-xml"}
+
+    mkdir -p $HOME_DIR
+    mkdir -p $CONF_DIR
+
+    download_resources $HOME_DIR
     apply_xfce_settings $CONF_DIR
-    apply_tmux_settings $HOME
+    apply_tmux_settings $HOME_DIR
 }
 
-main
+main $*

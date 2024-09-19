@@ -72,8 +72,19 @@ genfstab -U $INSTALL_DIR >> $INSTALL_DIR/etc/fstab
 echo "%sudo	ALL=(ALL:ALL) ALL" >> $INSTALL_DIR/etc/sudoers
 arch-chroot $INSTALL_DIR groupadd sudo
 
+# Aditional tools installation
+pacstrap $INSTALL_DIR \
+    tmux \
+    xclip \
+    fastfetch \
+    inetutils \
+    code \
+    xz \
+    zip \
+    unzip
+
 # DE installation
-arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
+pacstrap $INSTALL_DIR \
     lightdm \
     lightdm-gtk-greeter \
     exo \
@@ -106,6 +117,9 @@ arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
 
 arch-chroot $INSTALL_DIR systemctl enable lightdm
 
+# DE configuration
+curl -s https://sh.flavien.io/xfce.sh | arch-chroot $INSTALL_DIR bash - /etc/skel
+
 # Local configuration
 echo "fr_FR.UTF-8 UTF-8" > $INSTALL_DIR/etc/locale.gen
 echo "LANG=fr_FR.UTF-8" > $INSTALL_DIR/etc/locale.conf
@@ -121,16 +135,6 @@ Section "InputClass"
         Option "XkbModel" "pc105"
 EndSection
 EOL
-
-# Aditional tools installation
-arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
-    tmux \
-    xclip \
-    fastfetch \
-    inetutils \
-    code \
-    zip \
-    unzip
 
 # User configuration
 arch-chroot $INSTALL_DIR useradd -m $USERNAME
