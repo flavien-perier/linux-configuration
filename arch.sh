@@ -118,7 +118,7 @@ arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
 arch-chroot $INSTALL_DIR systemctl enable lightdm
 
 # DE configuration
-curl -s https://sh.flavien.io/xfce.sh | arch-chroot $INSTALL_DIR bash - /etc/skel
+arch-chroot $INSTALL_DIR bash <(curl -s https://sh.flavien.io/xfce.sh) /etc/skel
 
 # Local configuration
 echo "fr_FR.UTF-8 UTF-8" > $INSTALL_DIR/etc/locale.gen
