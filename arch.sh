@@ -79,6 +79,8 @@ arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     fastfetch \
     inetutils \
     code \
+    curl \
+    wget \
     xz \
     zip \
     unzip
