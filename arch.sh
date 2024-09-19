@@ -73,7 +73,7 @@ echo "%sudo	ALL=(ALL:ALL) ALL" >> $INSTALL_DIR/etc/sudoers
 arch-chroot $INSTALL_DIR groupadd sudo
 
 # Aditional tools installation
-pacstrap $INSTALL_DIR \
+arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     tmux \
     xclip \
     fastfetch \
