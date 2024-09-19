@@ -84,7 +84,7 @@ pacstrap $INSTALL_DIR \
     unzip
 
 # DE installation
-pacstrap $INSTALL_DIR \
+arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     lightdm \
     lightdm-gtk-greeter \
     exo \
