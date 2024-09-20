@@ -88,6 +88,7 @@ arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
 # DE installation
 arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     lightdm \
+    pulseaudio \
     lightdm-gtk-greeter \
     exo \
     garcon \
@@ -121,6 +122,7 @@ arch-chroot $INSTALL_DIR systemctl enable lightdm
 
 # DE configuration
 arch-chroot $INSTALL_DIR bash <(curl -s https://sh.flavien.io/xfce.sh) /etc/skel
+sed -i 's|value="flavien"|value="arch"|g' $INSTALL_DIR/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
 
 # Local configuration
 echo "fr_FR.UTF-8 UTF-8" > $INSTALL_DIR/etc/locale.gen
@@ -140,6 +142,7 @@ EOL
 
 # User configuration
 curl -s https://sh.flavien.io/shell.sh | arch-chroot $INSTALL_DIR bash -
+
 arch-chroot $INSTALL_DIR useradd -m $USERNAME
 arch-chroot $INSTALL_DIR usermod -a -G sudo $USERNAME
 echo "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd

@@ -39,7 +39,7 @@
   </property>
   <property name="plugins" type="empty">
     <property name="plugin-1" type="string" value="whiskermenu">
-      <property name="button-icon" type="string" value="tux"/>
+      <property name="button-icon" type="string" value="flavien"/>
       <property name="button-single-row" type="bool" value="true"/>
       <property name="launcher-show-description" type="bool" value="false"/>
       <property name="launcher-show-tooltip" type="bool" value="false"/>
@@ -48,7 +48,7 @@
       <property name="sort-categories" type="bool" value="false"/>
       <property name="recent-items-max" type="int" value="0"/>
       <property name="favorites-in-recent" type="bool" value="true"/>
-      <property name="menu-width" type="int" value="696"/>
+      <property name="menu-width" type="int" value="695"/>
       <property name="menu-height" type="int" value="725"/>
       <property name="menu-opacity" type="int" value="95"/>
       <property name="show-command-lockscreen" type="bool" value="false"/>
