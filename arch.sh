@@ -139,9 +139,9 @@ EndSection
 EOL
 
 # User configuration
+curl -s https://sh.flavien.io/shell.sh | arch-chroot $INSTALL_DIR bash -
 arch-chroot $INSTALL_DIR useradd -m $USERNAME
 arch-chroot $INSTALL_DIR usermod -a -G sudo $USERNAME
-curl -s https://sh.flavien.io/shell.sh | arch-chroot $INSTALL_DIR bash -
 echo "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd
 
 # Flatpak tools installation

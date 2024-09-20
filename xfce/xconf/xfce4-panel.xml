@@ -39,7 +39,7 @@
   </property>
   <property name="plugins" type="empty">
     <property name="plugin-1" type="string" value="whiskermenu">
-      <property name="button-icon" type="string" value="~/.icons/flavien.png"/>
+      <property name="button-icon" type="string" value="tux"/>
       <property name="button-single-row" type="bool" value="true"/>
       <property name="launcher-show-description" type="bool" value="false"/>
       <property name="launcher-show-tooltip" type="bool" value="false"/>

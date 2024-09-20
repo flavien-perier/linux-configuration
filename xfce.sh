@@ -63,6 +63,7 @@ download_resources() {
 
     wget $GITHUB_PROJECT_BASE_URL/xfce/icons/flavien.png -O $ICONS_DIR/flavien.png
     wget $GITHUB_PROJECT_BASE_URL/xfce/icons/manjaro.png -O $ICONS_DIR/manjaro.png
+    wget $GITHUB_PROJECT_BASE_URL/xfce/icons/arch.png -O $ICONS_DIR/arch.png
 
     # Themes
     chmod -R 700 $THEMES_DIR || echo "No themes dir"
