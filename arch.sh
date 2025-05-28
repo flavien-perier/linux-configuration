@@ -31,10 +31,17 @@ timedatectl set-ntp true
 
 mkfs.fat -F32 ${DISK}1
 mkswap ${DISK}2
-yes | mkfs.ext4 ${DISK}3
+mkfs.btrfs -f ${DISK}3
 
 swapon ${DISK}2
 mount ${DISK}3 $INSTALL_DIR
+btrfs subvolume create $INSTALL_DIR/@
+btrfs subvolume create $INSTALL_DIR/@home
+umount $INSTALL_DIR
+
+mount -o noatime,compress=zstd,space_cache=v2,subvol=@ ${DISK}3 $INSTALL_DIR
+mkdir -p $INSTALL_DIR/home
+mount -o noatime,compress=zstd,space_cache=v2,subvol=@home ${DISK}3 $INSTALL_DIR/home
 
 pacstrap $INSTALL_DIR base linux linux-firmware grub efibootmgr systemd networkmanager sudo pacman flatpak
 
