@@ -309,27 +309,22 @@ securise_location() {
 
 download_scripts() {
     local KUBECTL_VSERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
-    local DOCKER_COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep "tag_name" | awk '{match($0,"\"tag_name\": \"(.+)\",",a)}END{print a[1]}')
     local KOMPOSE_VERSION=$(curl -s https://api.github.com/repos/kubernetes/kompose/releases/latest | grep "tag_name" | awk '{match($0,"\"tag_name\": \"(.+)\",",a)}END{print a[1]}')
 
     local KUBECTL_ARCH="amd64"
-    local DOCKER_COMPOSE_ARCH="x86_64"
     local KOMPOSE_ARCH="amd64"
 
     case $(uname -m) in
     x86_64)
         KUBECTL_ARCH="amd64"
-        DOCKER_COMPOSE_ARCH="x86_64"
         KOMPOSE_ARCH="amd64"
         ;;
     aarch64)
         KUBECTL_ARCH="arm64"
-        DOCKER_COMPOSE_ARCH="armv7"
         KOMPOSE_ARCH="arm64"
         ;;
     armv7l)
         KUBECTL_ARCH="arm"
-        DOCKER_COMPOSE_ARCH="armv7"
         KOMPOSE_ARCH="arm"
         ;;
     esac
@@ -345,9 +340,6 @@ download_scripts() {
 
     curl -Lqs https://raw.githubusercontent.com/ahmetb/kubectx/master/kubens -o $LSC_USER_BIN/kubens
     printf "kubens [\033[0;32mOK\033[0m]\n"
-
-    curl -Lqs https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-linux-$DOCKER_COMPOSE_ARCH -o $LSC_USER_BIN/docker-compose
-    printf "docker-compose [\033[0;32mOK\033[0m]\n"
 
     curl -Lqs https://github.com/kubernetes/kompose/releases/download/$KOMPOSE_VERSION/kompose-linux-$KOMPOSE_ARCH -o $LSC_USER_BIN/kompose
     printf "kompose [\033[0;32mOK\033[0m]\n"
