@@ -4,6 +4,9 @@
 
 set -e
 
+OK="[\033[0;32mOK\033[0m]"
+KO="[\033[0;31mKO\033[0m]"
+
 LSC_USER_BIN=$(mktemp -dt lsc-XXXXXXX)
 LSC_ZNAP=$(mktemp -dt znap-XXXXXXX)
 
@@ -307,6 +310,35 @@ securise_location() {
 
 }
 
+install_packages() {
+    local PACKAGE_INSTALLER="printf 'Installation $KO\n' && exit 1"
+    command_exists "apt-get" && apt-get update -qq && PACKAGE_INSTALLER="apt-get install -qq -y"
+    command_exists "yum" && PACKAGE_INSTALLER="yum install -q -y"
+    command_exists "dnf" && PACKAGE_INSTALLER="dnf install -q -y"
+    command_exists "apk" && PACKAGE_INSTALLER="apk add --update --no-cache"
+    command_exists "pacman" && PACKAGE_INSTALLER="pacman -q --noconfirm -S"
+
+    install_package() {
+        local PCKAGE_NAME="$1"
+        local PCKAGE_REPO_NAME="$2"
+
+        command_exists "$PCKAGE" || $PACKAGE_INSTALLER $PCKAGE_REPO_NAME 1>/dev/null && \
+            printf "$PCKAGE_REPO_NAME $OK\n" || printf "$PCKAGE_REPO_NAME $KO\n"
+    }
+
+    install_package "bash" "bash"
+    install_package "zsh" "zsh"
+    install_package "fish" "fish"
+    install_package "nvim" "neovim"
+    install_package "git" "git"
+    install_package "htop" "htop"
+    install_package "curl" "curl"
+    install_package "wget" "wget"
+    install_package "tree" "tree"
+    install_package "gawk" "gawk"
+    install_package "rg" "ripgrep"
+}
+
 download_scripts() {
     local KUBECTL_VSERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
     local KOMPOSE_VERSION=$(curl -s https://api.github.com/repos/kubernetes/kompose/releases/latest | grep "tag_name" | awk '{match($0,"\"tag_name\": \"(.+)\",",a)}END{print a[1]}')
@@ -330,19 +362,19 @@ download_scripts() {
     esac
 
     git clone -q --depth 1 -- https://github.com/marlonrichert/zsh-snap.git $LSC_ZNAP
-    printf "zsh-snap [\033[0;32mOK\033[0m]\n"
+    printf "zsh-snap $OK\n"
 
     curl -Lqs https://storage.googleapis.com/kubernetes-release/release/$KUBECTL_VSERSION/bin/linux/$KUBECTL_ARCH/kubectl -o $LSC_USER_BIN/kubectl
-    printf "kubectl [\033[0;32mOK\033[0m]\n"
+    printf "kubectl $OK\n"
 
     curl -Lqs https://raw.githubusercontent.com/ahmetb/kubectx/master/kubectx -o $LSC_USER_BIN/kubectx
-    printf "kubectx [\033[0;32mOK\033[0m]\n"
+    printf "kubectx $OK\n"
 
     curl -Lqs https://raw.githubusercontent.com/ahmetb/kubectx/master/kubens -o $LSC_USER_BIN/kubens
-    printf "kubens [\033[0;32mOK\033[0m]\n"
+    printf "kubens $OK\n"
 
     curl -Lqs https://github.com/kubernetes/kompose/releases/download/$KOMPOSE_VERSION/kompose-linux-$KOMPOSE_ARCH -o $LSC_USER_BIN/kompose
-    printf "kompose [\033[0;32mOK\033[0m]\n"
+    printf "kompose $OK\n"
 }
 
 install_conf() {
@@ -426,59 +458,13 @@ install_conf() {
         fi
     fi
 
-    printf "Configure user \033[0;36m$USER_NAME\033[0m with home \033[0;36m$USER_HOME\033[0m [\033[0;32mOK\033[0m]\n"
+    printf "Configure user \033[0;36m$USER_NAME\033[0m with home \033[0;36m$USER_HOME\033[0m $OK\n"
 }
 
 main() {
     if [ $(id -u) -eq 0 ]
     then
-        local PACKAGE_INSTALLER="printf 'Installation [\033[0;31mKO\033[0m]\n' && exit 1"
-        command_exists "apt-get" && apt-get update -qq && PACKAGE_INSTALLER="apt-get install -qq -y"
-        command_exists "yum" && PACKAGE_INSTALLER="yum install -q -y"
-        command_exists "dnf" && PACKAGE_INSTALLER="dnf install -q -y"
-        command_exists "apk" && PACKAGE_INSTALLER="apk add --update --no-cache"
-        command_exists "pacman" && PACKAGE_INSTALLER="pacman -q --noconfirm -S"
-
-        command_exists "bash" || $PACKAGE_INSTALLER bash 1>/dev/null && \
-            printf "bash [\033[0;32mOK\033[0m]\n" || \
-            printf "bash [\033[0;31mKO\033[0m]\n"
-
-        command_exists "zsh" || $PACKAGE_INSTALLER zsh 1>/dev/null && \
-            printf "zsh [\033[0;32mOK\033[0m]\n" || \
-            printf "zsh [\033[0;31mKO\033[0m]\n"
-
-        command_exists "fish" || $PACKAGE_INSTALLER fish 1>/dev/null && \
-            printf "fish [\033[0;32mOK\033[0m]\n" || \
-            printf "fish [\033[0;31mKO\033[0m]\n"
-
-        command_exists "nvim" || $PACKAGE_INSTALLER neovim 1>/dev/null && \
-            printf "neovim [\033[0;32mOK\033[0m]\n" || \
-            printf "neovim [\033[0;31mKO\033[0m]\n"
-
-        command_exists "git" || $PACKAGE_INSTALLER git 1>/dev/null && \
-            printf "git [\033[0;32mOK\033[0m]\n" || \
-            printf "git [\033[0;31mKO\033[0m]\n"
-
-        command_exists "htop" || $PACKAGE_INSTALLER htop 1>/dev/null && \
-            printf "htop [\033[0;32mOK\033[0m]\n" || \
-            printf "htop [\033[0;31mKO\033[0m]\n"
-
-        command_exists "curl" || $PACKAGE_INSTALLER curl 1>/dev/null && \
-            printf "curl [\033[0;32mOK\033[0m]\n" || \
-            printf "curl [\033[0;31mKO\033[0m]\n"
-
-        command_exists "wget" || $PACKAGE_INSTALLER wget 1>/dev/null && \
-            printf "wget [\033[0;32mOK\033[0m]\n" || \
-            printf "wget [\033[0;31mKO\033[0m]\n"
-
-        command_exists "tree" || $PACKAGE_INSTALLER tree 1>/dev/null && \
-            printf "tree [\033[0;32mOK\033[0m]\n" || \
-            printf "tree [\033[0;31mKO\033[0m]\n"
-
-        command_exists "gawk" || $PACKAGE_INSTALLER gawk 1>/dev/null && \
-            printf "gawk [\033[0;32mOK\033[0m]\n" || \
-            printf "gawk [\033[0;31mKO\033[0m]\n"
-
+        install_packages
         download_scripts
 
         print_bashrc > /etc/bash.bashrc
@@ -495,6 +481,12 @@ main() {
         mkdir -p /etc/skel/
         install_conf root /etc/skel
     else
+        if ! command_exists curl || ! command_exists git || ! command_exists gawk
+        then
+            printf "To run without root privileges, the script requires \033[0;36mcurl\033[0m, \033[0;36mgit\033[0m, and \033[0;36mawk\033[0m.\n"
+            exit 1
+        fi
+
         download_scripts
 
         install_conf $USER ~
@@ -504,7 +496,7 @@ main() {
     rm -Rf $LSC_USER_BIN
     rm -Rf $LSC_ZNAP
 
-    printf "Installation [\033[0;32mOK\033[0m]\n"
+    printf "Installation $OK\n"
 }
 
 main
