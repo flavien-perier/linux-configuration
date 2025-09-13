@@ -526,7 +526,7 @@ main() {
         local USER_NAME="$(id -u)"
         local USER_GROUP="$(id -g)"
 
-        install_conf "$USER" "$USER" "$HOME"
+        install_conf "$USER_NAME" "$USER_GROUP" "$HOME"
 
         if command_exists chsh && command_exists fish
         then
