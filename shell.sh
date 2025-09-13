@@ -281,7 +281,7 @@ alias egrep="egrep --color=auto"
 alias df="df -h"
 alias du="du -hs"
 alias free="free -h"
-alias ll="ls -alh --time-style=\"+%Y-%m-%d %H:%M\""
+alias ll="eza -aalgM --time-style=long-iso --git --color-scale"
 alias vi="nvim"
 
 alias use-bash="exec bash"
@@ -331,6 +331,7 @@ install_packages() {
     install_package "fish" "fish"
     install_package "nvim" "neovim"
     install_package "git" "git"
+    install_package "eza" "eza"
     install_package "htop" "htop"
     install_package "curl" "curl"
     install_package "wget" "wget"
@@ -489,7 +490,7 @@ main() {
 
         download_scripts
 
-        install_conf $USER ~
+        install_conf $USER $HOME
         command_exists chsh && chsh -s $(which fish) $USER
     fi
 
