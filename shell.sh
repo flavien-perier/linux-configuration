@@ -271,9 +271,8 @@ fi'
 print_alias_list() {
     echo '# Alias list
 
-alias ls="ls --color=auto"
-alias dir="dir --color=auto"
-alias vdir="vdir --color=auto"
+alias ls="eza"
+alias dir="eza"
 alias grep="grep --color=auto"
 alias fgrep="fgrep --color=auto"
 alias egrep="egrep --color=auto"
