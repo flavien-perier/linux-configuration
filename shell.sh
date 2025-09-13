@@ -523,17 +523,17 @@ main() {
 
         download_scripts
 
-        local USER_NAME="$(id -u)"
-        local USER_GROUP="$(id -g)"
+        local USER_NAME="$(id -u -n)"
+        local USER_GROUP="$(id -g -n)"
 
         install_conf "$USER_NAME" "$USER_GROUP" "$HOME"
 
         if command_exists chsh && command_exists fish
         then
-            chsh -s $(which fish) "$USER"
+            chsh -s $(which fish) "$USER_NAME"
         elif command_exists chsh && command_exists zsh
         then
-            chsh -s $(which zsh) "$USER"
+            chsh -s $(which zsh) "$USER_NAME"
         fi
     fi
 
