@@ -524,9 +524,10 @@ main() {
         download_scripts
 
         local USER_NAME="$(id -u -n)"
-        local USER_GROUP="$(id -g -n)"
+        local USER_NAME_ID="$(id -u)"
+        local USER_GROUP_ID="$(id -g)"
 
-        install_conf "$USER_NAME" "$USER_GROUP" "$HOME"
+        install_conf "$USER_NAME_ID" "$USER_GROUP_ID" "$HOME"
 
         if command_exists chsh && command_exists fish
         then
