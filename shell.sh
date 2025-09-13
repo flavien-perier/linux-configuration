@@ -269,20 +269,40 @@ fi'
 }
 
 print_alias_list() {
-    echo '# Alias list
+    echo "# Alias list"
 
-alias ls="eza"
-alias dir="eza"
+echo "## ls aliases"
+if command_exists eza
+then
+    echo 'alias ls="eza"
+alias ll="eza -aalgM --time-style=long-iso --git --color-scale"
+alias dir="eza"'
+else
+    echo 'alias ls="ls --color=auto"
+alias ll="ls -alh --time-style=\"+%Y-%m-%d %H:%M\""
+alias dir="dir --color=auto"'
+fi
+
+echo "## vi aliases"
+if command_exists nvim
+then
+    echo 'alias vi="nvim"'
+else
+    echo 'alias vi="vim"'
+fi
+
+echo '## grep coloration
 alias grep="grep --color=auto"
 alias fgrep="fgrep --color=auto"
 alias egrep="egrep --color=auto"
+alias rg="rg --color=auto"'
 
+echo '## Human readable aliases
 alias df="df -h"
 alias du="du -hs"
-alias free="free -h"
-alias ll="eza -aalgM --time-style=long-iso --git --color-scale"
-alias vi="nvim"
+alias free="free -h"'
 
+echo '## Change shell
 alias use-bash="exec bash"
 alias use-fish="exec fish"
 alias use-zsh="exec zsh"'
@@ -321,8 +341,12 @@ install_packages() {
         local PCKAGE_NAME="$1"
         local PCKAGE_REPO_NAME="$2"
 
-        command_exists "$PCKAGE" || $PACKAGE_INSTALLER $PCKAGE_REPO_NAME 1>/dev/null && \
-            printf "$PCKAGE_REPO_NAME $OK\n" || printf "$PCKAGE_REPO_NAME $KO\n"
+        if command_exists "$PCKAGE" || $PACKAGE_INSTALLER $PCKAGE_REPO_NAME 1>/dev/null
+        then
+            printf "$PCKAGE_REPO_NAME $OK\n"
+        else
+            printf "$PCKAGE_REPO_NAME $KO\n"
+        fi
     }
 
     install_package "bash" "bash"
