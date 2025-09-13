@@ -313,16 +313,17 @@ command_exists() {
 }
 
 securise_location() {
-    local OWNER="$1"
-    local LOCATION="$2"
+    local USER_NAME="$1"
+    local USER_GROUP="$2"
+    local LOCATION="$3"
 
     if [ -f $LOCATION ]
     then
-        chown -R $OWNER:$OWNER "$LOCATION"
+        chown -R $USER_NAME:$USER_GROUP "$LOCATION"
         chmod 400 $LOCATION
     elif [ -d $LOCATION ]
     then
-        chown -R $OWNER:$OWNER "$LOCATION"
+        chown -R $USER_NAME:$USER_GROUP "$LOCATION"
         find $LOCATION -type f -exec chmod 400 {} \;
         find $LOCATION -type d -exec chmod 700 {} \;
     fi
@@ -403,7 +404,8 @@ download_scripts() {
 
 install_conf() {
     local USER_NAME=$1
-    local USER_HOME=$2
+    local USER_GROUP=$2
+    local USER_HOME=$3
 
     local BASHRC_PATH="$USER_HOME/.bashrc"
     local ZSHRC_PATH="$USER_HOME/.zshrc"
@@ -417,28 +419,28 @@ install_conf() {
     if [ ! -d $USER_HOME ]
     then
         mkdir -p $USER_HOME
-        securise_location $USER_NAME $USER_HOME
+        securise_location $USER_NAME $USER_GROUP $USER_HOME
     fi
 
     if [ ! -d $CONFIG_DIR ]
     then
         mkdir -p $CONFIG_DIR
-        securise_location $USER_NAME $CONFIG_DIR
+        securise_location $USER_NAME $USER_GROUP $CONFIG_DIR
     fi
 
     print_bashrc > $BASHRC_PATH
-    securise_location $USER_NAME $BASHRC_PATH
+    securise_location $USER_NAME $USER_GROUP $BASHRC_PATH
 
     print_zshrc > $ZSHRC_PATH
-    securise_location $USER_NAME $ZSHRC_PATH
+    securise_location $USER_NAME $USER_GROUP $ZSHRC_PATH
 
     mkdir -p $FISH_DIR
     print_fishrc > $FISH_DIR/config.fish
-    securise_location $USER_NAME $FISH_DIR
+    securise_location $USER_NAME $USER_GROUP $FISH_DIR
 
     mkdir -p $NEOVIM_DIR
     print_neovim > $NEOVIM_DIR/init.vim
-    securise_location $USER_NAME $NEOVIM_DIR
+    securise_location $USER_NAME $USER_GROUP $NEOVIM_DIR
 
     if [ -f $ZNAP_DIR ]
     then
@@ -447,20 +449,20 @@ install_conf() {
     fi
     mkdir -p $ZNAP_DIR
     cp -r $LSC_ZNAP $ZNAP_DIR/znap
-    securise_location $USER_NAME $ZNAP_DIR
+    securise_location $USER_NAME $USER_GROUP $ZNAP_DIR
 
     if [ ! -f $ALIAS_PATH ]
     then
         touch $ALIAS_PATH
         print_alias_list > $ALIAS_PATH
-        securise_location $USER_NAME $ALIAS_PATH
+        securise_location $USER_NAME $USER_GROUP $ALIAS_PATH
     fi
 
     mkdir -p $USER_BIN_DIR
     if [ -d $LSC_USER_BIN ] && [ $USER_NAME != "root" ]
     then
         cp -R $LSC_USER_BIN/* $USER_BIN_DIR/
-        securise_location $USER_NAME $USER_BIN_DIR
+        securise_location $USER_NAME $USER_GROUP $USER_BIN_DIR
         chmod u+x $USER_BIN_DIR/*
     fi
 
@@ -478,7 +480,7 @@ install_conf() {
         if ! grep -q "# linux-shell-configuration" $PROFILE_FILE
         then
             print_profile >> $PROFILE_FILE
-            securise_location $USER_NAME $PROFILE_FILE
+            securise_location $USER_NAME $USER_GROUP $PROFILE_FILE
         fi
     fi
 
@@ -495,15 +497,23 @@ main() {
 
         for USER_INFOS in $(cat /etc/passwd | grep -v ":/usr/sbin/nologin$" | cut -f1,6 -d: | grep ":/home/")
         do
-            install_conf "$(echo $USER_INFOS | cut -f1 -d:)" "$(echo $USER_INFOS | cut -f2 -d:)"
-            command_exists chsh && chsh -s $(which fish) $USER_NAME
+            USER_NAME="$(echo $USER_INFOS | cut -f1 -d:)"
+            install_conf "$USER_NAME" "$USER_NAME" "$(echo $USER_INFOS | cut -f2 -d:)"
+
+            if command_exists chsh && command_exists fish
+            then
+                chsh -s $(which fish) "$USER_NAME"
+            elif command_exists chsh && command_exists zsh
+            then
+                chsh -s $(which zsh) "$USER_NAME"
+            fi
         done
 
-        install_conf root ~
+        install_conf root root ~
         command_exists chsh && chsh -s /bin/bash
 
         mkdir -p /etc/skel/
-        install_conf root /etc/skel
+        install_conf root root /etc/skel
     else
         if ! command_exists curl || ! command_exists git || ! command_exists gawk
         then
@@ -513,8 +523,18 @@ main() {
 
         download_scripts
 
-        install_conf $USER $HOME
-        command_exists chsh && chsh -s $(which fish) $USER
+        local USER_NAME="$(id -u)"
+        local USER_GROUP="$(id -g)"
+
+        install_conf "$USER" "$USER" "$HOME"
+
+        if command_exists chsh && command_exists fish
+        then
+            chsh -s $(which fish) "$USER"
+        elif command_exists chsh && command_exists zsh
+        then
+            chsh -s $(which zsh) "$USER"
+        fi
     fi
 
     rm -Rf $LSC_USER_BIN
