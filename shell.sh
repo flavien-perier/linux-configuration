@@ -291,6 +291,12 @@ else
     echo 'alias vi="vim"'
 fi
 
+if command_exists batcat
+then
+    echo "## bat aliases"
+    echo 'alias bat="batcat"'
+fi
+
 echo '## grep coloration
 alias grep="grep --color=auto"
 alias fgrep="fgrep --color=auto"
@@ -353,15 +359,17 @@ install_packages() {
     install_package "bash" "bash"
     install_package "zsh" "zsh"
     install_package "fish" "fish"
-    install_package "nvim" "neovim"
     install_package "git" "git"
-    install_package "eza" "eza"
-    install_package "htop" "htop"
     install_package "curl" "curl"
     install_package "wget" "wget"
-    install_package "tree" "tree"
+    install_package "htop" "htop"
+    install_package "nvim" "neovim"
     install_package "gawk" "gawk"
+    install_package "tree" "tree"
+    install_package "eza" "eza"
     install_package "rg" "ripgrep"
+    install_package "bat" "bat"
+    install_package "dust" "dust"
 }
 
 download_scripts() {
