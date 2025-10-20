@@ -368,6 +368,7 @@ install_packages() {
     install_package "tree" "tree"
     install_package "eza" "eza"
     install_package "rg" "ripgrep"
+    install_package "fd" "fd"
     install_package "bat" "bat"
     install_package "dust" "dust"
 }
