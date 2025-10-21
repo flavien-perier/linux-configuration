@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <channel name="xfce4-terminal" version="1.0">
-  <property name="font-name" type="string" value="JetBrains Mono NL 15"/>
+  <property name="font-name" type="string" value="JetBrains Mono weight=436 15"/>
   <property name="tab-activity-color" type="string" value="#ff7f7f"/>
   <property name="color-foreground" type="string" value="#ffffff"/>
   <property name="color-background" type="string" value="#000000"/>
