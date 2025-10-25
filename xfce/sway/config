@@ -1,0 +1,31 @@
+set $mod Mod4
+
+input "*" {
+    dwt enabled
+    tap enabled
+    drag enabled
+    drag_lock enabled
+    natural_scroll enabled
+    middle_emulation enabled
+    xkb_layout "fr"
+}
+
+xwayland disable
+
+for_window [app_id="imv"] floating enable
+for_window [app_id="mpv"] floating enable
+for_window [app_id="xfce4-appfinder"] floating enable
+for_window [title="Panel Preferences"] floating enable
+for_window [title="Display"] floating enable
+for_window [title="Settings"] floating enable
+for_window [title="Keyboard"] floating enable
+for_window [title="Mouse and Touchpad"] floating enable
+for_window [title="Power Manager"] floating enable
+for_window [title="Session and Startup"] floating enable
+for_window [title="About the Xfce Desktop Environment"] floating enable
+
+exec /usr/bin/xfce4-session
+
+include /etc/sway/config.d/*
+include $HOME/.config/sway/config.d/*
+

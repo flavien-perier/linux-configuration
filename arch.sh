@@ -83,6 +83,7 @@ arch-chroot $INSTALL_DIR groupadd sudo
 arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     tmux \
     xclip \
+    wl-clipboard \
     fastfetch \
     inetutils \
     code \
@@ -122,8 +123,9 @@ arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     xfce4-xkb-plugin \
     xfconf \
     xfdesktop \
+    sway \
     xfwm4 \
-    xfwm4-themes \
+    xfwm4-themes
 
 arch-chroot $INSTALL_DIR systemctl enable lightdm
 

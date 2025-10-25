@@ -5,9 +5,9 @@
 set -e
 
 JETBRAINS_MONO_VERSION="2.304"
-SWEET_DARK_VERSION="5.0"
+SWEET_DARK_VERSION="6.0"
 
-GITHUB_PROJECT_BASE_URL="https://raw.githubusercontent.com/flavien-perier/linux-configuration/master"
+GITHUB_PROJECT_BASE_URL="https://raw.githubusercontent.com/flavien-perier/linux-configuration/master/xfce"
 
 command_exists() {
     command -v "$1" >/dev/null 2>&1
@@ -61,9 +61,9 @@ download_resources() {
     gtk-update-icon-cache $ICONS_DIR/Papirus-Dark/ || echo "Papirus-Dark theme optimisation failed"
     gtk-update-icon-cache $ICONS_DIR/Sweet-Rainbow/ || echo "Sweet-Rainbow theme optimisation failed"
 
-    wget $GITHUB_PROJECT_BASE_URL/xfce/icons/flavien.png -O $ICONS_DIR/flavien.png
-    wget $GITHUB_PROJECT_BASE_URL/xfce/icons/manjaro.png -O $ICONS_DIR/manjaro.png
-    wget $GITHUB_PROJECT_BASE_URL/xfce/icons/arch.png -O $ICONS_DIR/arch.png
+    wget $GITHUB_PROJECT_BASE_URL/icons/flavien.png -O $ICONS_DIR/flavien.png
+    wget $GITHUB_PROJECT_BASE_URL/icons/manjaro.png -O $ICONS_DIR/manjaro.png
+    wget $GITHUB_PROJECT_BASE_URL/icons/arch.png -O $ICONS_DIR/arch.png
 
     # Themes
     chmod -R 700 $THEMES_DIR || echo "No themes dir"
@@ -89,18 +89,18 @@ download_resources() {
 apply_xfce_settings() {
     local CONF_DIR=$1
 
-    curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfce4-keyboard-shortcuts.xml > $CONF_DIR/xfce4-keyboard-shortcuts.xml
-    curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfce4-panel.xml > $CONF_DIR/xfce4-panel.xml
-    curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfce4-terminal.xml > $CONF_DIR/xfce4-terminal.xml
-    curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfwm4.xml > $CONF_DIR/xfwm4.xml
-    curl $GITHUB_PROJECT_BASE_URL/xfce/xconf/xsettings.xml > $CONF_DIR/xsettings.xml
+    curl $GITHUB_PROJECT_BASE_URL/xconf/xfce4-keyboard-shortcuts.xml > $CONF_DIR/xfce4-keyboard-shortcuts.xml
+    curl $GITHUB_PROJECT_BASE_URL/xconf/xfce4-panel.xml > $CONF_DIR/xfce4-panel.xml
+    curl $GITHUB_PROJECT_BASE_URL/xconf/xfce4-terminal.xml > $CONF_DIR/xfce4-terminal.xml
+    curl $GITHUB_PROJECT_BASE_URL/xconf/xfwm4.xml > $CONF_DIR/xfwm4.xml
+    curl $GITHUB_PROJECT_BASE_URL/xconf/xsettings.xml > $CONF_DIR/xsettings.xml
 
     if ! command_exists "tmux"
     then
         sed -i \
             -e 's|<property name="run-custom-command" type="bool" value="true"/>|<property name="run-custom-command" type="bool" value="false"/>|g' \
             -e 's|<property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_NONE"/>|<property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_RIGHT"/>|g'\
-            $GITHUB_PROJECT_BASE_URL/xfce/xconf/xfce4-terminal.xml
+            $GITHUB_PROJECT_BASE_URL/xconf/xfce4-terminal.xml
     fi
 }
 
@@ -109,7 +109,19 @@ apply_tmux_settings() {
 
     if command_exists "tmux"
     then
-        curl $GITHUB_PROJECT_BASE_URL/xfce/tmux.conf > $HOME_DIR/.tmux.conf
+        curl $GITHUB_PROJECT_BASE_URL/tmux.conf > $HOME_DIR/.tmux.conf
+    fi
+}
+
+apply_sway_settings() {
+    local HOME_DIR=$1
+
+    if command_exists "sway"
+    then
+        mkdir -p $HOME_DIR/sway/config.d
+        curl $GITHUB_PROJECT_BASE_URL/sway/config > $HOME_DIR/sway/config
+        curl $GITHUB_PROJECT_BASE_URL/sway/config.d/keyboard > $HOME_DIR/sway/config.d/keyboard
+        curl $GITHUB_PROJECT_BASE_URL/sway/config.d/theme > $HOME_DIR/sway/config.d/theme
     fi
 }
 
@@ -128,6 +140,7 @@ main() {
     download_resources $HOME_DIR
     apply_xfce_settings $CONF_DIR
     apply_tmux_settings $HOME_DIR
+    apply_sway_settings $HOME_DIR
 }
 
 main $*
