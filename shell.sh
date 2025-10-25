@@ -98,7 +98,6 @@ setopt promptsubst
 zstyle ":completion:*:*:kill:*:processes" list-colors "=(#b) #([0-9]#)*=36=31"
 
 source ~/.znap/znap/znap.zsh
-znap source marlonrichert/zsh-autocomplete
 znap source zsh-users/zsh-autosuggestions
 znap source zsh-users/zsh-syntax-highlighting
 
