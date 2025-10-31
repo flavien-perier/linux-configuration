@@ -29,7 +29,7 @@ function git_prompt() {
     BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
     if [ $? -eq 0 ]
     then
-        if git diff --cached --exit-code > /dev/null
+        if git diff --quiet 2>/dev/null && git diff --cached --quiet 2>/dev/null && [ -z "$(git ls-files --others --exclude-standard 2>/dev/null)" ]
         then
             printf " \e[m[\e[32m$BRANCH\e[m]\e[34m"
         else
@@ -108,7 +108,7 @@ function git_prompt() {
     BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
     if [ $? -eq 0 ]
     then
-        if git diff --cached --exit-code > /dev/null
+        if git diff --quiet 2>/dev/null && git diff --cached --quiet 2>/dev/null && [ -z "$(git ls-files --others --exclude-standard 2>/dev/null)" ]
         then
             print -Pn " %f[%F{green}$BRANCH%f]%F{blue}"
         else
@@ -155,7 +155,8 @@ set -g fish_prompt_pwd_dir_length 10
 function git_prompt
     set BRANCH (git rev-parse --abbrev-ref HEAD 2>/dev/null)
     if [ $status -eq 0 ]
-        if git diff --cached --exit-code > /dev/null
+        set -l UNTRACKED (git ls-files --others --exclude-standard 2>/dev/null)
+        if git diff --quiet 2>/dev/null; and git diff --cached --quiet 2>/dev/null; and test -z "$UNTRACKED"
             set_color normal
             echo -n " ["
             set_color green
