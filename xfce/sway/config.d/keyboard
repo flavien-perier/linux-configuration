@@ -1,7 +1,14 @@
 bindsym $mod exec xfce4-popup-whiskermenu
 bindsym $mod+Return exec exo-open --launch TerminalEmulator
+bindsym $mod+b exec exo-open --launch WebBrowser
+bindsym $mod+m exec exo-open --launch MailReader
+bindsym $mod+f exec exo-open --launch FileManager
+bindsym $mod+v exec virt-manager
+bindsym $mod+k exec /usr/bin/flatpak run --socket=ssh-auth --branch=stable --arch=x86_64 --command=keepassxc --file-forwarding org.keepassxc.KeePassXC
+bindsym $mod+l exec xfce4-session-logout --switch-user
 
 bindsym $mod+Shift+q kill
+bindsym Mod1+F4 kill
 bindsym $mod+Shift+c reload
 
 floating_modifier $mod normal
@@ -12,6 +19,18 @@ bindsym $mod+Left focus left
 bindsym $mod+Down focus down
 bindsym $mod+Up focus up
 bindsym $mod+Right focus right
+
+# XFCE workspaces navigation (Ctrl+Alt+Arrows)
+bindsym Ctrl+Mod1+Left workspace prev
+bindsym Ctrl+Mod1+Right workspace next
+bindsym Ctrl+Mod1+Up workspace prev
+bindsym Ctrl+Mod1+Down workspace next
+
+# XFCE move window to adjacent workspace (Ctrl+Shift+Alt+Arrows)
+bindsym Ctrl+Shift+Mod1+Left move container to workspace prev
+bindsym Ctrl+Shift+Mod1+Right move container to workspace next
+bindsym Ctrl+Shift+Mod1+Up move container to workspace prev
+bindsym Ctrl+Shift+Mod1+Down move container to workspace next
 
 bindsym $mod+Shift+Left move left
 bindsym $mod+Shift+Down move down
@@ -25,7 +44,7 @@ bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
 
-bindsym $mod+f fullscreen
+bindsym Ctrl+Mod1+f fullscreen
 bindsym $mod+Shift+space floating toggle
 bindsym $mod+space focus mode_toggle
 bindsym $mod+a focus parent
