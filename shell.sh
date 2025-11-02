@@ -516,17 +516,23 @@ install_conf() {
         securise_location $USER_NAME $USER_GROUP $CONFIG_DIR
     fi
 
+    touch $BASHRC_PATH
+    chmod u+w $BASHRC_PATH
     print_bashrc > $BASHRC_PATH
     securise_location $USER_NAME $USER_GROUP $BASHRC_PATH
 
+    touch $ZSHRC_PATH
+    chmod u+w $ZSHRC_PATH
     print_zshrc > $ZSHRC_PATH
     securise_location $USER_NAME $USER_GROUP $ZSHRC_PATH
 
     mkdir -p $FISH_DIR
+    chmod -R u+w $FISH_DIR
     print_fishrc > $FISH_DIR/config.fish
     securise_location $USER_NAME $USER_GROUP $FISH_DIR
 
     mkdir -p $NEOVIM_DIR
+    chmod -R u+w $NEOVIM_DIR
     print_neovim > $NEOVIM_DIR/init.vim
     securise_location $USER_NAME $USER_GROUP $NEOVIM_DIR
 
@@ -549,26 +555,28 @@ install_conf() {
     mkdir -p $USER_BIN_DIR
     if [ -d $LSC_USER_BIN ] && [ $USER_NAME != "root" ]
     then
+        chmod -R u+w $USER_BIN_DIR
         cp -R $LSC_USER_BIN/* $USER_BIN_DIR/
         securise_location $USER_NAME $USER_GROUP $USER_BIN_DIR
         chmod u+x $USER_BIN_DIR/*
     fi
 
-    local PROFILE_FILE="no_profile"
+    local PROFILE_PATH="no_profile"
     if [ -f $USER_HOME/.profile ]
     then
-        PROFILE_FILE="$USER_HOME/.profile"
+        PROFILE_PATH="$USER_HOME/.profile"
     elif [ -f $USER_HOME/.bash_profile ]
     then
-        PROFILE_FILE="$USER_HOME/.bash_profile"
+        PROFILE_PATH="$USER_HOME/.bash_profile"
     fi
 
-    if [ $PROFILE_FILE != "no_profile" ]
+    if [ $PROFILE_PATH != "no_profile" ]
     then
-        if ! grep -q "# linux-shell-configuration" $PROFILE_FILE
+        if ! grep -q "# linux-shell-configuration" $PROFILE_PATH
         then
-            print_profile >> $PROFILE_FILE
-            securise_location $USER_NAME $USER_GROUP $PROFILE_FILE
+            chmod u+w $PROFILE_PATH
+            print_profile >> $PROFILE_PATH
+            securise_location $USER_NAME $USER_GROUP $PROFILE_PATH
         fi
     fi
 
