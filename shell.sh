@@ -24,10 +24,12 @@ export HISTIGNORE="ls:ll:pwd:clear"
 export HISTCONTROL="ignoredups"
 export HISTFILE="$HOME/.bash_history"
 
+PREEXEC_TIME=0
+
 function git_prompt() {
     local BRANCH=""
     BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-    if [ $? -eq 0 ]
+    if [[ $? -eq 0 ]]
     then
         if git diff --quiet 2>/dev/null && git diff --cached --quiet 2>/dev/null && [ -z "$(git ls-files --others --exclude-standard 2>/dev/null)" ]
         then
@@ -43,7 +45,7 @@ function git_prompt() {
 function exit_status_prompt() {
     local OLD_EXIT_STATUS=$1
 
-    if [ $OLD_EXIT_STATUS -ne 0 ]
+    if [[ $OLD_EXIT_STATUS -ne 0 ]]
     then
         printf " \e[m(\e[31m$OLD_EXIT_STATUS\e[m)"
     else
@@ -51,15 +53,48 @@ function exit_status_prompt() {
     fi
 }
 
+function time_prompt() {
+    local POSTEXEC_TIME="$1"
+
+    if [[ $PREEXEC_TIME -ne 0 ]]
+    then
+        local DURATION="$(($POSTEXEC_TIME - PREEXEC_TIME))"
+
+        if [[ $DURATION -ge 250 ]]
+        then
+            printf " \e[90m$DURATION ms"
+        else
+            printf ""
+        fi
+    else
+        printf ""
+    fi
+}
+
+function preexec() {
+    if [[ $PREEXEC_TIME -eq 0 ]]
+    then
+        PREEXEC_TIME="$(date +%s%3N)"
+    fi
+}
+trap "preexec" DEBUG
+
 function precmd() {
     local OLD_EXIT_STATUS=$?
+    local POSTEXEC_TIME="$(date +%s%3N)"
 
-    if [ $UID -eq 0 ]
+    local USER_COLOR="32"
+    local USER_SYMBOL="%"
+
+    if [[ $UID -eq 0 ]]
     then
-        export PS1="\[\e[m\]\$(date +"%H:%M:%S") \e[1mB\e[m \[\e[31m\]\u@\H \[\e[34m\]\w\$(exit_status_prompt $OLD_EXIT_STATUS)$(git_prompt)\n\[\e[31m\]#\[\e[m\] > "
-    else
-        export PS1="\[\e[m\]\$(date +"%H:%M:%S") \e[1mB\e[m \[\e[32m\]\u@\H \[\e[34m\]\w\$(exit_status_prompt $OLD_EXIT_STATUS)$(git_prompt)\n\[\e[32m\]%\[\e[m\] > "
+        USER_COLOR="31"
+        USER_SYMBOL="#"
     fi
+
+    export PS1="\[\e[m\]\$(date +"%H:%M:%S") \e[1mB\e[m \[\e[${USER_COLOR}m\]\u@\H \[\e[34m\]\w\$(exit_status_prompt $OLD_EXIT_STATUS)$(git_prompt)$(time_prompt $POSTEXEC_TIME)\n\[\e[${USER_COLOR}m\]${USER_SYMBOL}\[\e[m\] > "
+
+    PREEXEC_TIME=0
 }
 
 PROMPT_COMMAND=precmd
@@ -103,10 +138,12 @@ znap source zsh-users/zsh-syntax-highlighting
 
 setopt correctall
 
+PREEXEC_TIME=0
+
 function git_prompt() {
     local BRANCH=""
     BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
-    if [ $? -eq 0 ]
+    if [[ $? -eq 0 ]]
     then
         if git diff --quiet 2>/dev/null && git diff --cached --quiet 2>/dev/null && [ -z "$(git ls-files --others --exclude-standard 2>/dev/null)" ]
         then
@@ -122,7 +159,7 @@ function git_prompt() {
 function exit_status_prompt() {
     local OLD_EXIT_STATUS=$1
 
-    if [ $OLD_EXIT_STATUS -ne 0 ]
+    if [[ $OLD_EXIT_STATUS -ne 0 ]]
     then
         print -Pn " %f(%F{red}$OLD_EXIT_STATUS%f)"
     else
@@ -130,17 +167,48 @@ function exit_status_prompt() {
     fi
 }
 
+function time_prompt() {
+    local POSTEXEC_TIME="$1"
+
+    if [[ $PREEXEC_TIME -ne 0 ]]
+    then
+        local DURATION="$(($POSTEXEC_TIME - PREEXEC_TIME))"
+
+        if [[ $DURATION -ge 250 ]]
+        then
+            printf " \e[90m$DURATION ms"
+        else
+            printf ""
+        fi
+    else
+        printf ""
+    fi
+}
+
+function preexec() {
+    if [[ $PREEXEC_TIME -eq 0 ]]
+    then
+        PREEXEC_TIME="$(date +%s%3N)"
+    fi
+}
+
 function precmd() {
     local OLD_EXIT_STATUS=$?
+    local POSTEXEC_TIME="$(date +%s%3N)"
 
-    if [ $UID -eq 0 ]
+    local USER_COLOR="green"
+    local USER_SYMBOL="%"
+
+    if [[ $UID -eq 0 ]]
     then
-        export PROMPT="%f%* %BZ%b %F{red}%n@%m %F{blue}%~\$(exit_status_prompt $OLD_EXIT_STATUS)$(git_prompt)
-%F{red}%#%f > "
-    else
-        export PROMPT="%f%* %BZ%b %F{green}%n@%m %F{blue}%~\$(exit_status_prompt $OLD_EXIT_STATUS)$(git_prompt)
-%F{green}%#%f > "
+        USER_COLOR="red"
+        USER_SYMBOL="#"
     fi
+
+    export PROMPT="%f%* %BZ%b %F{$USER_COLOR}%n@%m %F{blue}%~\$(exit_status_prompt $OLD_EXIT_STATUS)$(git_prompt)$(time_prompt $POSTEXEC_TIME)
+%F{$USER_COLOR}%${USER_SYMBOL}%f > "
+
+    PREEXEC_TIME=0
 }
 
 source $HOME/.alias'
@@ -195,6 +263,16 @@ function exit_status_prompt
     end
 end
 
+function time_prompt
+    if set -q CMD_DURATION; and test $CMD_DURATION -ge 250
+        set_color brblack
+        echo -n " $CMD_DURATION ms"
+        set_color normal
+    else
+        echo -n ""
+    end
+end
+
 function fish_prompt
     set OLD_EXIT_STATUS $status
 
@@ -211,7 +289,7 @@ function fish_prompt
         set_color green
     end
 
-    echo -n $LOGNAME
+    echo -n $(id -un)
     echo -n @
     echo -n (hostname)
 
@@ -222,6 +300,7 @@ function fish_prompt
 
     exit_status_prompt $OLD_EXIT_STATUS
     git_prompt
+    time_prompt
 
     echo ""
 
@@ -348,7 +427,7 @@ install_packages() {
         local PCKAGE_NAME="$1"
         local PCKAGE_REPO_NAME="$2"
 
-        if command_exists "$PCKAGE" || $PACKAGE_INSTALLER $PCKAGE_REPO_NAME 1>/dev/null
+        if command_exists "$PCKAGE_NAME" || $PACKAGE_INSTALLER $PCKAGE_REPO_NAME 1>/dev/null
         then
             printf "$PCKAGE_REPO_NAME $OK\n"
         else
