@@ -28,7 +28,7 @@ download_resources() {
 
     wget https://github.com/ryanoasis/nerd-fonts/releases/download/v$JET_BRAINS_MONO_NERD_VERSION/JetBrainsMono.zip \
         -O "$TEMP_DIR/JetBrainsMono.zip"
-    unzip -qq -j "$TEMP_DIR/JetBrainsMono.zip" -d $FONTS_DIR JetBrainsMono-master/fonts/ttf/JetBrainsMonoNerdFont*.ttf
+    unzip -qq -j "$TEMP_DIR/JetBrainsMono.zip" -d $FONTS_DIR "JetBrainsMonoNerdFont-*.ttf"
 
     # Icons
     chmod -R 700 $ICONS_DIR || echo "No icons dir"
