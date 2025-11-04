@@ -2,7 +2,7 @@ gaps inner 2
 gaps outer 2
 
 default_border pixel 2
-font pango:JetBrainsMono 10
+font pango:JetBrainsMono Nerd Font Medium 10
 smart_borders on
 
 for_window [shell="xdg_shell"] title_format "%title (%app_id)"

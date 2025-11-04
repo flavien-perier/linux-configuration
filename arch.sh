@@ -130,7 +130,7 @@ arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
 arch-chroot $INSTALL_DIR systemctl enable lightdm
 
 # DE configuration
-arch-chroot $INSTALL_DIR bash <(curl -s https://sh.flavien.io/xfce.sh) /etc/skel
+arch-chroot $INSTALL_DIR bash <(curl -Lqs https://sh.flavien.io/xfce.sh) /etc/skel
 sed -i 's|value="flavien"|value="arch"|g' $INSTALL_DIR/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
 
 # Local configuration
@@ -150,7 +150,7 @@ EndSection
 EOL
 
 # User configuration
-curl -s https://sh.flavien.io/shell.sh | arch-chroot $INSTALL_DIR bash -
+curl -Lqs https://sh.flavien.io/shell.sh | arch-chroot $INSTALL_DIR bash -
 
 arch-chroot $INSTALL_DIR useradd -m $USERNAME
 arch-chroot $INSTALL_DIR usermod -a -G sudo $USERNAME

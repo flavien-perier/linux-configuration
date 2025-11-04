@@ -453,8 +453,8 @@ install_packages() {
 }
 
 download_scripts() {
-    local KUBECTL_VSERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
-    local KOMPOSE_VERSION=$(curl -s https://api.github.com/repos/kubernetes/kompose/releases/latest | grep "tag_name" | awk '{match($0,"\"tag_name\": \"(.+)\",",a)}END{print a[1]}')
+    local KUBECTL_VSERSION=$(curl -Lqs https://storage.googleapis.com/kubernetes-release/release/stable.txt)
+    local KOMPOSE_VERSION=$(curl -Lqs https://api.github.com/repos/kubernetes/kompose/releases/latest | grep "tag_name" | awk '{match($0,"\"tag_name\": \"(.+)\",",a)}END{print a[1]}')
 
     local KUBECTL_ARCH="amd64"
     local KOMPOSE_ARCH="amd64"

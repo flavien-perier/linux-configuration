@@ -95,7 +95,7 @@
       <property name="show-seconds" type="bool" value="false"/>
       <property name="digital-time-format" type="string" value=" %Y-%m-%d &lt;b&gt;%H:%M&lt;/b&gt;"/>
       <property name="digital-layout" type="uint" value="3"/>
-      <property name="digital-time-font" type="string" value="JetBrains Mono Bold 13"/>
+      <property name="digital-time-font" type="string" value="JetBrainsMono Nerd Font Medium 13"/>
     </property>
     <property name="plugin-8" type="string" value="separator">
       <property name="style" type="uint" value="0"/>
