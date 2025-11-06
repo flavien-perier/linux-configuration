@@ -232,7 +232,6 @@ function git_prompt
             set_color normal
             echo -n "]"
             set_color blue
-            echo -n " "
         else
             set_color normal
             echo -n " ["
@@ -241,7 +240,6 @@ function git_prompt
             set_color normal
             echo -n "]"
             set_color blue
-            echo -n " "
         end
     else
         echo -n ""
