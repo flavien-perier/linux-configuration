@@ -159,6 +159,15 @@ echo "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd
 # Flatpak tools installation
 arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak remote-add --user flathub https://flathub.org/repo/flathub.flatpakrepo"
 
+arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak override --user --reset"
+
+arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak override --user --filesystem=/home/$USERNAME/.themes"
+arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak override --user --filesystem=/home/$USERNAME/.icons"
+arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak override --user --filesystem=/home/$USERNAME/.fonts"
+
+arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak override --user --env=GTK_THEME=Sweet-Dark-v40"
+arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak override --user --env=ICON_THEME=Sweet-Rainbow"
+
 # Grub installation
 arch-chroot $INSTALL_DIR grub-install ${DISK} --force
 arch-chroot $INSTALL_DIR grub-mkconfig -o /boot/grub/grub.cfg
