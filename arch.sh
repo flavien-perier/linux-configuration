@@ -118,6 +118,7 @@ arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     xfce4-session \
     xfce4-settings \
     xfce4-taskmanager \
+    xfce4-terminal \
     xfce4-whiskermenu-plugin \
     xfce4-xkb-plugin \
     rio \
@@ -128,6 +129,7 @@ arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     xfwm4-themes
 
 arch-chroot $INSTALL_DIR systemctl enable lightdm
+arch-chroot $INSTALL_DIR systemctl enable seatd
 
 # DE configuration
 arch-chroot $INSTALL_DIR bash <(curl -Lqs https://sh.flavien.io/xfce.sh) /etc/skel

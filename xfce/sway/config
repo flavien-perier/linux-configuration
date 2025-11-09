@@ -28,4 +28,3 @@ exec /usr/bin/xfce4-session
 
 include /etc/sway/config.d/*
 include $HOME/.config/sway/config.d/*
-
