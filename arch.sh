@@ -118,9 +118,9 @@ arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
     xfce4-session \
     xfce4-settings \
     xfce4-taskmanager \
-    xfce4-terminal \
     xfce4-whiskermenu-plugin \
     xfce4-xkb-plugin \
+    rio \
     xfconf \
     xfdesktop \
     sway \

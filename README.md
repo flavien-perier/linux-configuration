@@ -79,7 +79,6 @@ This script downloads and applies a full customization for an XFCE environment, 
       ```sh
       sudo ./xfce.sh /etc/skel
       ```
-    - Optional parameters: `xfce.sh [HOME_DIR] [XFCE_CONF_DIR]` (defaults: `HOME`, `~/.config/xfce4/xfconf/xfce-perchannel-xml`).
 
 ## 3) `arch.sh` — Automated Arch Linux base install + XFCE
 

@@ -13,7 +13,7 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-download_resources() {
+download_themes() {
     local HOME_DIR=$1
 
     local TEMP_DIR=$(mktemp -d /tmp/xfce.XXXXXXXXXX)
@@ -89,6 +89,8 @@ download_resources() {
 apply_xfce_settings() {
     local CONF_DIR=$1
 
+    mkdir -p $CONF_DIR
+
     curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfce4-keyboard-shortcuts.xml -o $CONF_DIR/xfce4-keyboard-shortcuts.xml
     curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfce4-panel.xml -o $CONF_DIR/xfce4-panel.xml
     curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfce4-terminal.xml -o $CONF_DIR/xfce4-terminal.xml
@@ -121,6 +123,15 @@ apply_sway_settings() {
     fi
 }
 
+apply_rio_settings() {
+    local CONF_DIR=$1
+
+    if command_exists "rio"; then
+        mkdir $CONF_DIR
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/rio.conf -o $CONF_DIR/config.toml
+    fi
+}
+
 main() {
     command_exists "wget" || (echo "wget not found" && exit 1)
     command_exists "curl" || (echo "curl not found" && exit 1)
@@ -128,17 +139,15 @@ main() {
     command_exists "xz" || (echo "xz not found" && exit 1)
 
     local HOME_DIR=${1:-"$HOME"}
-    local XFCE_CONF_DIR=${2:-"$HOME_DIR/.config/xfce4/xfconf/xfce-perchannel-xml"}
+    local XFCE_CONF_DIR="$$HOME_DIR/.config/xfce4/xfconf/xfce-perchannel-xml"
     local SWAY_CONF_DIR="$HOME_DIR/.config/sway"
+    local RIO_CONF_DIR="$HOME_DIR/.config/rio"
 
-    mkdir -p $HOME_DIR
-    mkdir -p $XFCE_CONF_DIR
-    mkdir -p $SWAY_CONF_DIR
-
-    download_resources $HOME_DIR
+    download_themes $HOME_DIR
     apply_xfce_settings $XFCE_CONF_DIR
     apply_tmux_settings $HOME_DIR
     apply_sway_settings $SWAY_CONF_DIR
+    apply_rio_settings $RIO_CONF_DIR
 }
 
 main $*
