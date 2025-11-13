@@ -60,7 +60,17 @@ function time_prompt() {
     then
         local DURATION="$(($POSTEXEC_TIME - PREEXEC_TIME))"
 
-        if [[ $DURATION -ge 250 ]]
+        if [[ $DURATION -ge 600000 ]]
+        then
+            local MIN="$(( DURATION / 60000 ))"
+            local SEC="$(( DURATION / 1000 ))"
+            printf " \e[90m%s m (%s s)" "$MIN" "$SEC"
+        elif [[ $DURATION -ge 10000 ]]
+        then
+            local SEC="$(( DURATION / 1000 ))"
+            local MS="$DURATION"
+            printf " \e[90m%s s (%s ms)" "$SEC" "$MS"
+        elif [[ $DURATION -ge 250 ]]
         then
             printf " \e[90m$DURATION ms"
         else
@@ -174,7 +184,17 @@ function time_prompt() {
     then
         local DURATION="$(($POSTEXEC_TIME - PREEXEC_TIME))"
 
-        if [[ $DURATION -ge 250 ]]
+        if [[ $DURATION -ge 600000 ]]
+        then
+            local MIN="$(( DURATION / 60000 ))"
+            local SEC="$(( DURATION / 1000 ))"
+            printf " \e[90m%s m (%s s)" "$MIN" "$SEC"
+        elif [[ $DURATION -ge 10000 ]]
+        then
+            local SEC="$(( DURATION / 1000 ))"
+            local MS="$DURATION"
+            printf " \e[90m%s s (%s ms)" "$SEC" "$MS"
+        elif [[ $DURATION -ge 250 ]]
         then
             printf " \e[90m$DURATION ms"
         else
@@ -262,10 +282,26 @@ function exit_status_prompt
 end
 
 function time_prompt
-    if set -q CMD_DURATION; and test $CMD_DURATION -ge 250
-        set_color brblack
-        echo -n " $CMD_DURATION ms"
-        set_color normal
+    if set -q CMD_DURATION
+        if test $CMD_DURATION -ge 600000
+            set min (math -s0 "$CMD_DURATION / 60000")
+            set sec (math -s0 "$CMD_DURATION / 1000")
+            set_color brblack
+            echo -n " $min m ($sec s)"
+            set_color normal
+        else if test $CMD_DURATION -ge 10000
+            set sec (math -s0 "$CMD_DURATION / 1000")
+            set ms $CMD_DURATION
+            set_color brblack
+            echo -n " $sec s ($ms ms)"
+            set_color normal
+        else if test $CMD_DURATION -ge 250
+            set_color brblack
+            echo -n " $CMD_DURATION ms"
+            set_color normal
+        else
+            echo -n ""
+        end
     else
         echo -n ""
     end
