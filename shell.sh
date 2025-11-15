@@ -623,7 +623,13 @@ main() {
         install_packages
         download_scripts
 
+    if [ -f /etc/bash.bashrc ]
+    then
         print_bashrc > /etc/bash.bashrc
+    elif [ -f /etc/bashrc ]
+    then
+        print_bashrc > /etc/bashrc
+    fi
 
         for USER_INFOS in $(cat /etc/passwd | grep -v ":/usr/sbin/nologin$" | cut -f1,6 -d: | grep ":/home/")
         do
