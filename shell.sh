@@ -102,7 +102,7 @@ function precmd() {
         USER_SYMBOL="#"
     fi
 
-    export PS1="\[\e[m\]\$(date +"%H:%M:%S") \e[1mB\e[m \[\e[${USER_COLOR}m\]\u@\H \[\e[34m\]\w\$(exit_status_prompt $OLD_EXIT_STATUS)$(git_prompt)$(time_prompt $POSTEXEC_TIME)\n\[\e[${USER_COLOR}m\]${USER_SYMBOL}\[\e[m\] > "
+    export PS1="\[\e[m\]\$(date +"%H:%M:%S") \e[1mB\e[m \[\e[${USER_COLOR}m\]\u@\H \[\e[34m\]\w\$(git_prompt)$(exit_status_prompt $OLD_EXIT_STATUS)$(time_prompt $POSTEXEC_TIME)\n\[\e[${USER_COLOR}m\]${USER_SYMBOL}\[\e[m\] > "
 
     PREEXEC_TIME=0
 }
@@ -225,7 +225,7 @@ function precmd() {
         USER_SYMBOL="#"
     fi
 
-    export PROMPT="%f%* %BZ%b %F{$USER_COLOR}%n@%m %F{blue}%~\$(exit_status_prompt $OLD_EXIT_STATUS)$(git_prompt)$(time_prompt $POSTEXEC_TIME)
+    export PROMPT="%f%* %BZ%b %F{$USER_COLOR}%n@%m %F{blue}%~\$(git_prompt)$(exit_status_prompt $OLD_EXIT_STATUS)$(time_prompt $POSTEXEC_TIME)
 %F{$USER_COLOR}%${USER_SYMBOL}%f > "
 
     PREEXEC_TIME=0
@@ -332,8 +332,8 @@ function fish_prompt
     echo -n " "
     echo -n (prompt_pwd)
 
-    exit_status_prompt $OLD_EXIT_STATUS
     git_prompt
+    exit_status_prompt $OLD_EXIT_STATUS
     time_prompt
 
     echo ""
