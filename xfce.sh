@@ -100,7 +100,8 @@ apply_xfce_settings() {
     if ! command_exists "tmux"; then
         sed -i \
             -e 's|<property name="run-custom-command" type="bool" value="true"/>|<property name="run-custom-command" type="bool" value="false"/>|g' \
-            -e 's|<property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_NONE"/>|<property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_RIGHT"/>|g'p $GITHUB_PROJECT_BASE_URL/xconf/xfce4-terminal.xml
+            -e 's|<property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_NONE"/>|<property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_RIGHT"/>|g'p \
+            $CONF_DIR/xfce4-terminal.xml
     fi
 }
 
@@ -139,7 +140,7 @@ main() {
     command_exists "xz" || (echo "xz not found" && exit 1)
 
     local HOME_DIR=${1:-"$HOME"}
-    local XFCE_CONF_DIR="$$HOME_DIR/.config/xfce4/xfconf/xfce-perchannel-xml"
+    local XFCE_CONF_DIR="$HOME_DIR/.config/xfce4/xfconf/xfce-perchannel-xml"
     local SWAY_CONF_DIR="$HOME_DIR/.config/sway"
     local RIO_CONF_DIR="$HOME_DIR/.config/rio"
 
