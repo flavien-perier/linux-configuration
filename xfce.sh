@@ -108,8 +108,10 @@ apply_xfce_settings() {
 apply_tmux_settings() {
     local HOME_DIR=$1
 
-    if command_exists "tmux"; then
-        curl -Lqs $GITHUB_PROJECT_BASE_URL/tmux.conf -o $HOME_DIR/.tmux.conf
+    if command_exists "tmux" && command_exists "sway"; then
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/tmux.wayland.conf -o $HOME_DIR/.tmux.conf
+    elif command_exists "tmux"; then
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/tmux.x11.conf -o $HOME_DIR/.tmux.conf
     fi
 }
 
