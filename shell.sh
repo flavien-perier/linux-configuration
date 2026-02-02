@@ -28,9 +28,10 @@ if [ -f "$HOME/.user_paths" ]
 then
     for USER_PATH in $(cat "$HOME/.user_paths")
     do
+        USER_PATH=$(eval echo "$USER_PATH")
         if [ -d "$USER_PATH" ] && [[ ":$PATH:" != *":$USER_PATH:"* ]]
         then
-            export PATH="$USER_PATH:$PATH"
+            export PATH="$PATH:$USER_PATH"
         fi
     done
 fi
@@ -152,9 +153,10 @@ if [ -f "$HOME/.user_paths" ]
 then
     for USER_PATH in $(cat "$HOME/.user_paths")
     do
+        USER_PATH=$(eval echo "$USER_PATH")
         if [ -d "$USER_PATH" ] && [[ ":$PATH:" != *":$USER_PATH:"* ]]
         then
-            export PATH="$USER_PATH:$PATH"
+            export PATH="$PATH:$USER_PATH"
         fi
     done
 fi
@@ -264,8 +266,9 @@ set -g fish_prompt_pwd_dir_length 10
 
 if test -f "$HOME/.user_paths"
     for USER_PATH in (cat "$HOME/.user_paths")
+        set USER_PATH (eval echo "$USER_PATH")
         if test -d "$USER_PATH"; and not contains "$USER_PATH" $PATH
-            set -gx PATH "$USER_PATH" $PATH
+            set -gx PATH $PATH "$USER_PATH"
         end
     end
 end
@@ -410,8 +413,8 @@ print_user_paths() {
     echo "/usr/bin"
     echo "/usr/local/bin"
     echo "/usr/games"
-    echo "~/bin"
-    echo "~/.local/bin"
+    echo "\$HOME/bin"
+    echo "\$HOME/.local/bin"
 }
 
 print_alias_list() {
