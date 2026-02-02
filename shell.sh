@@ -24,6 +24,17 @@ export HISTIGNORE="ls:ll:pwd:clear"
 export HISTCONTROL="ignoredups"
 export HISTFILE="$HOME/.bash_history"
 
+if [ -f "$HOME/.user_paths" ]
+then
+    for USER_PATH in $(cat "$HOME/.user_paths")
+    do
+        if [ -d "$USER_PATH" ] && [[ ":$PATH:" != *":$USER_PATH:"* ]]
+        then
+            export PATH="$USER_PATH:$PATH"
+        fi
+    done
+fi
+
 PREEXEC_TIME=0
 
 function git_prompt() {
@@ -137,6 +148,17 @@ export HISTIGNORE="ls:ll:pwd:clear"
 export HISTCONTROL="ignoredups"
 export HISTFILE="$HOME/.bash_history"
 
+if [ -f "$HOME/.user_paths" ]
+then
+    for USER_PATH in $(cat "$HOME/.user_paths")
+    do
+        if [ -d "$USER_PATH" ] && [[ ":$PATH:" != *":$USER_PATH:"* ]]
+        then
+            export PATH="$USER_PATH:$PATH"
+        fi
+    done
+fi
+
 zmodload zsh/complist
 setopt extendedglob
 setopt promptsubst
@@ -239,6 +261,14 @@ print_fishrc() {
 
 set --universal fish_greeting ""
 set -g fish_prompt_pwd_dir_length 10
+
+if test -f "$HOME/.user_paths"
+    for USER_PATH in (cat "$HOME/.user_paths")
+        if test -d "$USER_PATH"; and not contains "$USER_PATH" $PATH
+            set -gx PATH "$USER_PATH" $PATH
+        end
+    end
+end
 
 function git_prompt
     set BRANCH (git rev-parse --abbrev-ref HEAD 2>/dev/null)
@@ -367,18 +397,22 @@ syntax on
 '
 }
 
-print_profile() {
-    echo '
-# linux-shell-configuration
-if [ $USER = "root" ]
-then
-    export PATH="$PATH:/sbin"
-    export PATH="$PATH:/usr/sbin"
-fi
-if [ -d $HOME/bin ]
-then
-    export PATH="$PATH:$HOME/bin"
-fi'
+print_user_paths() {
+    local USER_NAME="$1"
+    local USER_HOME="$2"
+
+    if [ $USER_NAME = "root" ]
+    then
+        echo "/sbin"
+        echo "/usr/sbin"
+        echo "/usr/local/sbin"
+    fi
+    echo "/bin"
+    echo "/usr/bin"
+    echo "/usr/local/bin"
+    echo "/usr/games"
+    echo "$USER_HOME/bin"
+    echo "$USER_HOME/.local/bin"
 }
 
 print_alias_list() {
@@ -531,6 +565,7 @@ install_conf() {
 
     local BASHRC_PATH="$USER_HOME/.bashrc"
     local ZSHRC_PATH="$USER_HOME/.zshrc"
+    local USER_PATHS_PATH="$USER_HOME/.user_paths"
     local CONFIG_DIR="$USER_HOME/.config"
     local FISH_DIR="$CONFIG_DIR/fish"
     local NEOVIM_DIR="$CONFIG_DIR/nvim"
@@ -565,6 +600,8 @@ install_conf() {
     print_fishrc > $FISH_DIR/config.fish
     securise_location $USER_NAME $USER_GROUP $FISH_DIR
 
+    print_user_paths "$USER_NAME" "$USER_HOME" > $USER_PATHS_PATH
+
     mkdir -p $NEOVIM_DIR
     chmod -R u+w $NEOVIM_DIR
     print_neovim > $NEOVIM_DIR/init.vim
@@ -593,25 +630,6 @@ install_conf() {
         cp -R $LSC_USER_BIN/* $USER_BIN_DIR/
         securise_location $USER_NAME $USER_GROUP $USER_BIN_DIR
         chmod u+x $USER_BIN_DIR/*
-    fi
-
-    local PROFILE_PATH="no_profile"
-    if [ -f $USER_HOME/.profile ]
-    then
-        PROFILE_PATH="$USER_HOME/.profile"
-    elif [ -f $USER_HOME/.bash_profile ]
-    then
-        PROFILE_PATH="$USER_HOME/.bash_profile"
-    fi
-
-    if [ $PROFILE_PATH != "no_profile" ]
-    then
-        if ! grep -q "# linux-shell-configuration" $PROFILE_PATH
-        then
-            chmod u+w $PROFILE_PATH
-            print_profile >> $PROFILE_PATH
-            securise_location $USER_NAME $USER_GROUP $PROFILE_PATH
-        fi
     fi
 
     printf "Configure user \033[0;36m$USER_NAME\033[0m with home \033[0;36m$USER_HOME\033[0m $OK\n"
