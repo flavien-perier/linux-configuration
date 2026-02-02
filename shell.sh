@@ -399,7 +399,6 @@ syntax on
 
 print_user_paths() {
     local USER_NAME="$1"
-    local USER_HOME="$2"
 
     if [ $USER_NAME = "root" ]
     then
@@ -411,8 +410,8 @@ print_user_paths() {
     echo "/usr/bin"
     echo "/usr/local/bin"
     echo "/usr/games"
-    echo "$USER_HOME/bin"
-    echo "$USER_HOME/.local/bin"
+    echo "~/bin"
+    echo "~/.local/bin"
 }
 
 print_alias_list() {
@@ -565,12 +564,12 @@ install_conf() {
 
     local BASHRC_PATH="$USER_HOME/.bashrc"
     local ZSHRC_PATH="$USER_HOME/.zshrc"
-    local USER_PATHS_PATH="$USER_HOME/.user_paths"
     local CONFIG_DIR="$USER_HOME/.config"
     local FISH_DIR="$CONFIG_DIR/fish"
     local NEOVIM_DIR="$CONFIG_DIR/nvim"
     local ZNAP_DIR="$USER_HOME/.znap"
     local ALIAS_PATH="$USER_HOME/.alias"
+    local USER_PATHS_PATH="$USER_HOME/.user_paths"
     local USER_BIN_DIR="$USER_HOME/bin"
 
     if [ ! -d $USER_HOME ]
@@ -600,11 +599,6 @@ install_conf() {
     print_fishrc > $FISH_DIR/config.fish
     securise_location $USER_NAME $USER_GROUP $FISH_DIR
 
-    touch $USER_PATHS_PATH
-    chmod u+w $USER_PATHS_PATH
-    print_user_paths "$USER_NAME" "$USER_HOME" > $USER_PATHS_PATH
-    securise_location $USER_NAME $USER_GROUP $USER_PATHS_PATH
-
     mkdir -p $NEOVIM_DIR
     chmod -R u+w $NEOVIM_DIR
     print_neovim > $NEOVIM_DIR/init.vim
@@ -624,6 +618,13 @@ install_conf() {
         touch $ALIAS_PATH
         print_alias_list > $ALIAS_PATH
         securise_location $USER_NAME $USER_GROUP $ALIAS_PATH
+    fi
+
+    if [ ! -f $USER_PATHS_PATH ]
+    then
+        touch $USER_PATHS_PATH
+        print_user_paths "$USER_NAME" > $USER_PATHS_PATH
+        securise_location $USER_NAME $USER_GROUP $USER_PATHS_PATH
     fi
 
     mkdir -p $USER_BIN_DIR
