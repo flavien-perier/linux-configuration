@@ -600,7 +600,10 @@ install_conf() {
     print_fishrc > $FISH_DIR/config.fish
     securise_location $USER_NAME $USER_GROUP $FISH_DIR
 
+    touch $USER_PATHS_PATH
+    chmod u+w $USER_PATHS_PATH
     print_user_paths "$USER_NAME" "$USER_HOME" > $USER_PATHS_PATH
+    securise_location $USER_NAME $USER_GROUP $USER_PATHS_PATH
 
     mkdir -p $NEOVIM_DIR
     chmod -R u+w $NEOVIM_DIR
