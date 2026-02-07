@@ -222,7 +222,14 @@ configure_grub() {
 }
 
 main() {
-    INSTALL_DIR="$(mktemp -d)"
+    # Check if running as root
+    if [ "$EUID" -ne 0 ]
+    then
+        whiptail --title "$SCRIPT_TITLE" --msgbox "This script must be run as root" 10 50
+        exit 1
+    fi
+
+    INSTALL_DIR="$(mktemp -d -p /mnt install.XXX)"
 
     if grep -q "ID=arch" /etc/os-release
     then
