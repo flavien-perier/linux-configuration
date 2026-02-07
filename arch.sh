@@ -64,21 +64,41 @@ create_partitions() {
 }
 
 install_base_packages() {
-    local BASE_PACKAGES="base linux linux-firmware grub efibootmgr cryptsetup btrfs-progs plymouth systemd networkmanager pacman"
+    local BASE_PACKAGES="base grub efibootmgr cryptsetup btrfs-progs plymouth systemd networkmanager pacman"
 
     if [[ "$CD_TYPE" == "arch" ]]
     then
         pacstrap $INSTALL_DIR $BASE_PACKAGES \
+            linux \
+            linux-firmware \
             pulseaudio
     elif [[ "$CD_TYPE" == "manjaro" ]]
     then
         pacman-mirrors --fasttrack
 
         basestrap $INSTALL_DIR $BASE_PACKAGES \
+            base-devel \
+            linux618 \
+            linux618-headers \
+            linux-firmware-amdgpu \
+            linux-firmware-atheros \
+            linux-firmware-broadcom \
+            linux-firmware-cirrus \
+            linux-firmware-intel \
+            linux-firmware-mediatek \
+            linux-firmware-meta \
+            linux-firmware-nvidia \
+            linux-firmware-other \
+            linux-firmware-radeon \
+            linux-firmware-realtek \
+            linux-firmware-whence \
             pacman-mirrors \
             manjaro-system \
+            manjaro-keyring \
             manjaro-release \
             manjaro-pipewire \
+            manjaro-alsa \
+            manjaro-settings-manager \
             mhwd \
             filesystem \
             grub-theme-manjaro \
