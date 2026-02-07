@@ -241,7 +241,14 @@ create_user() {
 configure_grub() {
     local DISK4_UUID=$(blkid -s UUID -o value $DISK4)
 
-    sed -i 's/^HOOKS=.*/HOOKS=(base systemd autodetect modconf kms keyboard sd-vconsole sd-plymouth sd-encrypt btrfs filesystems fsck)/' $INSTALL_DIR/etc/mkinitcpio.conf
+    if [[ "$CD_TYPE" == "arch" ]]
+    then
+        sed -i 's/^HOOKS=.*/HOOKS=(base udev autodetect modconf kms keyboard keymap consolefont plymouth encrypt btrfs filesystems fsck)/' $INSTALL_DIR/etc/mkinitcpio.conf
+    elif [[ "$CD_TYPE" == "manjaro" ]]
+    then
+        sed -i 's/^HOOKS=.*/HOOKS=(base systemd autodetect modconf kms keyboard sd-vconsole sd-plymouth sd-encrypt btrfs filesystems fsck)/' $INSTALL_DIR/etc/mkinitcpio.conf
+    fi
+
     sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"rd.luks.name=${DISK4_UUID}=system root=/dev/mapper/system rootflags=subvol=@ quiet splash loglevel=3 rd.udev.log_level=3 vt.global_cursor_default=0\"|" $INSTALL_DIR/etc/default/grub
     sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=0/' $INSTALL_DIR/etc/default/grub
 
