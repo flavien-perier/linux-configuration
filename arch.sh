@@ -241,9 +241,9 @@ create_user() {
 configure_grub() {
     local DISK4_UUID=$(blkid -s UUID -o value $DISK4)
 
-    sed -i 's/^HOOKS=.*/HOOKS=(base udev autodetect modconf kms keyboard keymap consolefont plymouth encrypt btrfs filesystems fsck)/' $INSTALL_DIR/etc/mkinitcpio.conf
-    sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=${DISK4_UUID}:system root=/dev/mapper/system rootflags=subvol=@ quiet splash\"|" $INSTALL_DIR/etc/default/grub
-    echo 'GRUB_ENABLE_CRYPTODISK=y' >> $INSTALL_DIR/etc/default/grub
+    sed -i 's/^HOOKS=.*/HOOKS=(base systemd autodetect modconf kms keyboard sd-vconsole sd-plymouth sd-encrypt btrfs filesystems fsck)/' $INSTALL_DIR/etc/mkinitcpio.conf
+    sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"rd.luks.name=${DISK4_UUID}=system root=/dev/mapper/system rootflags=subvol=@ quiet splash loglevel=3 rd.udev.log_level=3 vt.global_cursor_default=0\"|" $INSTALL_DIR/etc/default/grub
+    sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=0/' $INSTALL_DIR/etc/default/grub
 
     $CHROOT mkinitcpio -P
     $CHROOT grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --recheck
@@ -252,7 +252,7 @@ configure_grub() {
 
 main() {
     # Check if running as root
-    if [ "$EUID" -ne 0 ]
+    if [[ "$EUID" -ne 0 ]]
     then
         whiptail --title "$SCRIPT_TITLE" --msgbox "This script must be run as root" 10 50
         exit 1
@@ -273,7 +273,7 @@ main() {
         exit 1
     fi
 
-    if [ $# -eq 5 ]
+    if [[ $# -eq 5 ]]
     then
         HOSTNAME=$1
         DISK=$2
