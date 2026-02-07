@@ -64,8 +64,26 @@ create_partitions() {
 }
 
 install_base_packages() {
-    pacstrap $INSTALL_DIR base linux linux-firmware grub efibootmgr cryptsetup btrfs-progs plymouth systemd networkmanager sudo pacman flatpak
+    local BASE_PACKAGES="base linux linux-firmware grub efibootmgr cryptsetup btrfs-progs plymouth systemd networkmanager pacman"
 
+    if [[ "$CD_TYPE" == "arch" ]]
+    then
+        pacstrap $INSTALL_DIR $BASE_PACKAGES
+    elif [[ "$CD_TYPE" == "manjaro" ]]
+    then
+        basestrap $INSTALL_DIR $BASE_PACKAGES \
+            pacman-mirrors \
+            manjaro-system \
+            manjaro-release \
+            manjaro-pipewire \
+            mhwd \
+            filesystem \
+            grub-theme-manjaro \
+            plymouth-theme-manjaro
+    fi
+}
+
+configure_hostname() {
     echo "$HOSTNAME" > $INSTALL_DIR/etc/hostname
 }
 
@@ -91,10 +109,10 @@ FallbackDNS=208.67.220.220 1.0.0.1
 EOL
 
     rm -f $INSTALL_DIR/etc/resolv.conf
-    arch-chroot $INSTALL_DIR ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+    $CHROOT ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
-    arch-chroot $INSTALL_DIR systemctl enable systemd-resolved
-    arch-chroot $INSTALL_DIR systemctl enable NetworkManager
+    $CHROOT systemctl enable systemd-resolved
+    $CHROOT systemctl enable NetworkManager
 }
 
 configure_fstab() {
@@ -102,13 +120,10 @@ configure_fstab() {
     echo "tmpfs /tmp tmpfs defaults,noatime,mode=1777 0 0" >> $INSTALL_DIR/etc/fstab
 }
 
-configure_sudo() {
-    echo "%sudo	ALL=(ALL:ALL) ALL" >> $INSTALL_DIR/etc/sudoers
-    arch-chroot $INSTALL_DIR groupadd sudo
-}
-
 install_tools() {
-    arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
+    $CHROOT pacman --noconfirm -Sy \
+        sudo \
+        flatpak \
         tmux \
         xclip \
         wl-clipboard \
@@ -118,13 +133,19 @@ install_tools() {
         wget \
         xz \
         zip \
-        unzip
+        unzip \
+        binutils
 
-    curl -Lqs https://sh.flavien.io/shell.sh | arch-chroot $INSTALL_DIR bash -
+    curl -Lqs https://sh.flavien.io/shell.sh | $CHROOT bash -
+}
+
+configure_sudo() {
+    echo "%sudo	ALL=(ALL:ALL) ALL" >> $INSTALL_DIR/etc/sudoers
+    $CHROOT groupadd sudo
 }
 
 install_de() {
-    arch-chroot $INSTALL_DIR pacman --noconfirm -Sy \
+    $CHROOT pacman --noconfirm -Sy \
         lightdm \
         pulseaudio \
         lightdm-gtk-greeter \
@@ -158,10 +179,10 @@ install_de() {
         xfwm4 \
         xfwm4-themes
 
-    arch-chroot $INSTALL_DIR systemctl enable lightdm
-    arch-chroot $INSTALL_DIR systemctl enable seatd
+    $CHROOT systemctl enable lightdm
+    $CHROOT systemctl enable seatd
 
-    arch-chroot $INSTALL_DIR bash <(curl -Lqs https://sh.flavien.io/xfce.sh) /etc/skel
+    $CHROOT bash <(curl -Lqs https://sh.flavien.io/xfce.sh) /etc/skel
     sed -i 's|value="flavien"|value="arch"|g' $INSTALL_DIR/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
 }
 
@@ -169,9 +190,9 @@ configure_local() {
     echo "fr_FR.UTF-8 UTF-8" > $INSTALL_DIR/etc/locale.gen
     echo "LANG=fr_FR.UTF-8" > $INSTALL_DIR/etc/locale.conf
     echo "KEYMAP=fr" > $INSTALL_DIR/etc/vconsole.conf
-    arch-chroot $INSTALL_DIR ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
-    arch-chroot $INSTALL_DIR hwclock --systohc
-    arch-chroot $INSTALL_DIR locale-gen
+    $CHROOT ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
+    $CHROOT hwclock --systohc
+    $CHROOT locale-gen
     cat << EOL > $INSTALL_DIR/etc/X11/xorg.conf.d/00-keyboard.conf
 Section "InputClass"
         Identifier "system-keyboard"
@@ -183,9 +204,9 @@ EOL
 }
 
 create_user() {
-    arch-chroot $INSTALL_DIR useradd -m $USERNAME
-    arch-chroot $INSTALL_DIR usermod -a -G sudo $USERNAME
-    echo "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd
+    $CHROOT useradd -m $USERNAME
+    $CHROOT usermod -a -G sudo $USERNAME
+    echo "$USERNAME:$PASSWORD" | $CHROOT chpasswd
 }
 
 configure_grub() {
@@ -195,12 +216,27 @@ configure_grub() {
     sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=${DISK4_UUID}:system root=/dev/mapper/system rootflags=subvol=@ quiet splash\"|" $INSTALL_DIR/etc/default/grub
     echo 'GRUB_ENABLE_CRYPTODISK=y' >> $INSTALL_DIR/etc/default/grub
 
-    arch-chroot $INSTALL_DIR mkinitcpio -P
-    arch-chroot $INSTALL_DIR grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --recheck
-    arch-chroot $INSTALL_DIR grub-mkconfig -o /boot/grub/grub.cfg
+    $CHROOT mkinitcpio -P
+    $CHROOT grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --recheck
+    $CHROOT grub-mkconfig -o /boot/grub/grub.cfg
 }
 
 main() {
+    INSTALL_DIR="$(mktemp -d)"
+
+    if grep -q "ID=arch" /etc/os-release
+    then
+        CD_TYPE="arch"
+        CHROOT="arch-chroot $INSTALL_DIR"
+    elif grep -q "ID=manjaro" /etc/os-release
+    then
+        CD_TYPE="manjaro"
+        CHROOT="manjaro-chroot $INSTALL_DIR"
+    else
+        whiptail --title "$SCRIPT_TITLE" --msgbox "Unsupported distribution cd" 10 50
+        exit 1
+    fi
+
     if [ $# -eq 5 ]
     then
         HOSTNAME=$1
@@ -216,13 +252,6 @@ main() {
         LUKS_PASSWORD=$(whiptail --title "$SCRIPT_TITLE" --passwordbox "LUKS password" 10 50 3>&1 1>&2 2>&3)
     fi
 
-    if grep "id=arch" /etc/os-release
-    then
-        CD_TYPE="arch"
-    fi
-
-    INSTALL_DIR="$(mktemp -d)"
-
     ip link
     timedatectl set-ntp true
 
@@ -231,10 +260,11 @@ main() {
 
     create_partitions
     install_base_packages
+    configure_hostname
     configure_network
     configure_fstab
-    configure_sudo
     install_tools
+    configure_sudo
     install_de
     configure_local
     create_user
