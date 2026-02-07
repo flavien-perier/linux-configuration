@@ -239,18 +239,33 @@ create_user() {
 }
 
 configure_grub() {
-    local DISK4_UUID=$(blkid -s UUID -o value $DISK4)
+    local DISK4_UUID
+    DISK4_UUID=$(blkid -s UUID -o value "$DISK4")
+
+    local HOOKS
+    local GRUB_CMDLINE_LINUX
 
     if [[ "$CD_TYPE" == "arch" ]]
     then
-        sed -i 's/^HOOKS=.*/HOOKS=(base udev autodetect modconf kms keyboard keymap consolefont plymouth encrypt btrfs filesystems fsck)/' $INSTALL_DIR/etc/mkinitcpio.conf
+        HOOKS="(base udev plymouth autodetect modconf kms keyboard keymap block encrypt btrfs filesystems fsck)"
+        GRUB_CMDLINE_LINUX="cryptdevice=UUID=${DISK4_UUID}:system root=/dev/mapper/system rootflags=subvol=@ quiet splash"
     elif [[ "$CD_TYPE" == "manjaro" ]]
     then
-        sed -i 's/^HOOKS=.*/HOOKS=(base systemd autodetect modconf kms keyboard sd-vconsole sd-plymouth sd-encrypt btrfs filesystems fsck)/' $INSTALL_DIR/etc/mkinitcpio.conf
+        HOOKS="(base systemd autodetect modconf kms keyboard sd-vconsole plymouth block sd-encrypt btrfs filesystems fsck)"
+        GRUB_CMDLINE_LINUX="rd.luks.name=${DISK4_UUID}=system root=/dev/mapper/system rootflags=subvol=@ quiet splash"
     fi
 
-    sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"rd.luks.name=${DISK4_UUID}=system root=/dev/mapper/system rootflags=subvol=@ quiet splash loglevel=3 rd.udev.log_level=3 vt.global_cursor_default=0\"|" $INSTALL_DIR/etc/default/grub
-    sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=0/' $INSTALL_DIR/etc/default/grub
+    sed -i "s|^HOOKS=.*|HOOKS=$HOOKS|" "$INSTALL_DIR/etc/mkinitcpio.conf"
+    sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$GRUB_CMDLINE_LINUX\"|" "$INSTALL_DIR/etc/default/grub"
+
+    if ! grep -q '^GRUB_ENABLE_CRYPTODISK=' "$INSTALL_DIR/etc/default/grub"
+    then
+        echo "GRUB_ENABLE_CRYPTODISK=y" >> "$INSTALL_DIR/etc/default/grub"
+    else
+        sed -i 's/^GRUB_ENABLE_CRYPTODISK=.*/GRUB_ENABLE_CRYPTODISK=y/' "$INSTALL_DIR/etc/default/grub"
+    fi
+
+    sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=0/' "$INSTALL_DIR/etc/default/grub"
 
     $CHROOT mkinitcpio -P
     $CHROOT grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --recheck
