@@ -68,9 +68,12 @@ install_base_packages() {
 
     if [[ "$CD_TYPE" == "arch" ]]
     then
-        pacstrap $INSTALL_DIR $BASE_PACKAGES
+        pacstrap $INSTALL_DIR $BASE_PACKAGES \
+            pulseaudio
     elif [[ "$CD_TYPE" == "manjaro" ]]
     then
+        pacman-mirrors --fasttrack
+
         basestrap $INSTALL_DIR $BASE_PACKAGES \
             pacman-mirrors \
             manjaro-system \
@@ -116,7 +119,14 @@ EOL
 }
 
 configure_fstab() {
-    genfstab -U $INSTALL_DIR >> $INSTALL_DIR/etc/fstab
+    if [[ "$CD_TYPE" == "arch" ]]
+    then
+        genfstab -U $INSTALL_DIR >> $INSTALL_DIR/etc/fstab
+    elif [[ "$CD_TYPE" == "manjaro" ]]
+    then
+        fstabgen -U $INSTALL_DIR >> $INSTALL_DIR/etc/fstab
+    fi
+
     echo "tmpfs /tmp tmpfs defaults,noatime,mode=1777 0 0" >> $INSTALL_DIR/etc/fstab
 }
 
@@ -147,7 +157,6 @@ configure_sudo() {
 install_de() {
     $CHROOT pacman --noconfirm -Sy \
         lightdm \
-        pulseaudio \
         lightdm-gtk-greeter \
         exo \
         garcon \
