@@ -8,42 +8,85 @@ set -x
 SCRIPT_TITLE="Arch configuration"
 INSTALL_DIR="/mnt"
 
-if [ $# -eq 4 ]
+if [ $# -eq 5 ]
 then
     HOSTNAME=$1
     DISK=$2
     USERNAME=$3
     PASSWORD=$4
+    LUKS_PASSWORD=$5
 else
     HOSTNAME=$(whiptail --title "$SCRIPT_TITLE" --inputbox "Hostname" 10 50 3>&1 1>&2 2>&3)
     DISK=$(whiptail --title "$SCRIPT_TITLE" --inputbox "Disk used for install" 10 50 3>&1 1>&2 2>&3)
     USERNAME=$(whiptail --title "$SCRIPT_TITLE" --inputbox "Username" 10 50 3>&1 1>&2 2>&3)
     PASSWORD=$(whiptail --title "$SCRIPT_TITLE" --passwordbox "Password" 10 50 3>&1 1>&2 2>&3)
+    LUKS_PASSWORD=$(whiptail --title "$SCRIPT_TITLE" --passwordbox "LUKS password" 10 50 3>&1 1>&2 2>&3)
 fi
-
-parted --script $DISK mklabel gpt
-parted --script $DISK mkpart primary 1MiB 501MiB
-parted --script $DISK mkpart primary 501MiB 4501Mib
-parted --script $DISK mkpart primary 4501Mib 100%
 
 ip link
 timedatectl set-ntp true
 
-mkfs.fat -F32 ${DISK}1
-mkswap ${DISK}2
-mkfs.btrfs -f ${DISK}3
+# Creating disk partitions
+parted --script $DISK mklabel gpt
+parted --script $DISK mkpart primary 1MiB 501MiB
+parted --script $DISK mkpart primary 501MiB 1001MiB
+parted --script $DISK mkpart primary 1001MiB 9001Mib
+parted --script $DISK mkpart primary 9001Mib 100%
 
-swapon ${DISK}2
-mount ${DISK}3 $INSTALL_DIR
+if [[ $DISK == /dev/nvme* ]]
+then
+    DISK1=${DISK}p1
+    DISK2=${DISK}p2
+    DISK3=${DISK}p3
+    DISK4=${DISK}p4
+else
+    DISK1=${DISK}1
+    DISK2=${DISK}2
+    DISK3=${DISK}3
+    DISK4=${DISK}4
+fi
+
+mkfs.fat -F32 $DISK1
+mkfs.ext4 $DISK2
+mkswap $DISK3
+
+echo -n "$LUKS_PASSWORD" | cryptsetup luksFormat --type luks2 --pbkdf pbkdf2 --hash sha256 --batch-mode --key-file=- $DISK4
+echo -n "$LUKS_PASSWORD" | cryptsetup luksOpen --key-file=- $DISK4 system
+
+mkfs.btrfs -f /dev/mapper/system
+
+swapon $DISK3
+
+mount /dev/mapper/system $INSTALL_DIR
 btrfs subvolume create $INSTALL_DIR/@
 btrfs subvolume create $INSTALL_DIR/@home
+btrfs subvolume create $INSTALL_DIR/@log
+btrfs subvolume create $INSTALL_DIR/@cache
 umount $INSTALL_DIR
 
-mount -o noatime,compress=zstd,space_cache=v2,subvol=@ ${DISK}3 $INSTALL_DIR
-mkdir -p $INSTALL_DIR/home
-mount -o noatime,compress=zstd,space_cache=v2,subvol=@home ${DISK}3 $INSTALL_DIR/home
+mount -o defaults,discard=async,ssd,subvol=@ /dev/mapper/system $INSTALL_DIR
 
-pacstrap $INSTALL_DIR base linux linux-firmware grub efibootmgr systemd networkmanager sudo pacman flatpak
+mkdir -p $INSTALL_DIR/tmp
+
+mkdir -p $INSTALL_DIR/var/log
+mount -o defaults,discard=async,ssd,subvol=@log /dev/mapper/system $INSTALL_DIR/var/log
+
+mkdir -p $INSTALL_DIR/var/cache
+mount -o defaults,discard=async,ssd,subvol=@cache /dev/mapper/system $INSTALL_DIR/var/cache
+
+mkdir -p $INSTALL_DIR/home
+mount -o defaults,noatime,compress=zstd,space_cache=v2,subvol=@home /dev/mapper/system $INSTALL_DIR/home
+
+mkdir -p $INSTALL_DIR/boot
+mount $DISK2 $INSTALL_DIR/boot
+mkdir -p $INSTALL_DIR/boot/efi
+mount $DISK1 $INSTALL_DIR/boot/efi
+
+# Update keyring and CA certificates to avoid signature and SSL errors
+pacman -Sy --noconfirm archlinux-keyring ca-certificates ca-certificates-utils
+
+# Install base packages
+pacstrap $INSTALL_DIR base linux linux-firmware grub efibootmgr cryptsetup btrfs-progs plymouth systemd networkmanager sudo pacman flatpak
 
 echo "$HOSTNAME" > $INSTALL_DIR/etc/hostname
 
@@ -56,24 +99,27 @@ cat << EOL > $INSTALL_DIR/etc/hosts
 ::1       $HOSTNAME
 EOL
 
-cat << EOL | sudo tee $INSTALL_DIR/etc/NetworkManager/conf.d/90-dns.conf
+mkdir -p $INSTALL_DIR/etc/NetworkManager/conf.d
+cat << EOL > $INSTALL_DIR/etc/NetworkManager/conf.d/90-dns.conf
 [main]
-dns=none
+dns=systemd-resolved
 EOL
 
-cat << EOL > $INSTALL_DIR/etc/resolv.conf
-nameserver 208.67.222.222
-nameserver 208.67.220.220
-nameserver 1.1.1.1
-nameserver 1.0.0.1
-nameserver 151.80.222.79
+cat << EOL > /etc/systemd/resolved.conf
+[Resolve]
+DNS=208.67.222.222 1.1.1.1 151.80.222.79
+FallbackDNS=208.67.220.220 1.0.0.1
 EOL
+
+rm -f $INSTALL_DIR/etc/resolv.conf
+arch-chroot $INSTALL_DIR ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+
+arch-chroot $INSTALL_DIR systemctl enable systemd-resolved
 arch-chroot $INSTALL_DIR systemctl enable NetworkManager
 
 # Fstab configuration
-mkdir -p $INSTALL_DIR/boot/efi
-arch-chroot $INSTALL_DIR mount ${DISK}1 /boot/efi
 genfstab -U $INSTALL_DIR >> $INSTALL_DIR/etc/fstab
+echo "tmpfs /tmp tmpfs defaults,noatime,mode=1777 0 0" >> $INSTALL_DIR/etc/fstab
 
 # Sudo configuration
 echo "%sudo	ALL=(ALL:ALL) ALL" >> $INSTALL_DIR/etc/sudoers
@@ -158,18 +204,14 @@ arch-chroot $INSTALL_DIR useradd -m $USERNAME
 arch-chroot $INSTALL_DIR usermod -a -G sudo $USERNAME
 echo "$USERNAME:$PASSWORD" | arch-chroot $INSTALL_DIR chpasswd
 
-# Flatpak tools installation
-arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak remote-add --user flathub https://flathub.org/repo/flathub.flatpakrepo"
-
-arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak override --user --reset"
-
-arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak override --user --filesystem=/home/$USERNAME/.themes"
-arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak override --user --filesystem=/home/$USERNAME/.icons"
-arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak override --user --filesystem=/home/$USERNAME/.fonts"
-
-arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak override --user --env=GTK_THEME=Sweet-Dark-v40"
-arch-chroot $INSTALL_DIR su - $USERNAME -c "flatpak override --user --env=ICON_THEME=Sweet-Rainbow"
-
 # Grub installation
-arch-chroot $INSTALL_DIR grub-install ${DISK} --force
+
+DISK4_UUID=$(blkid -s UUID -o value $DISK4)
+
+sed -i 's/^HOOKS=.*/HOOKS=(base udev autodetect modconf kms keyboard keymap consolefont plymouth encrypt btrfs filesystems fsck)/' $INSTALL_DIR/etc/mkinitcpio.conf
+sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=${DISK4_UUID}:system root=/dev/mapper/system rootflags=subvol=@ quiet splash\"|" $INSTALL_DIR/etc/default/grub
+echo 'GRUB_ENABLE_CRYPTODISK=y' >> $INSTALL_DIR/etc/default/grub
+
+arch-chroot $INSTALL_DIR mkinitcpio -P
+arch-chroot $INSTALL_DIR grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB --recheck
 arch-chroot $INSTALL_DIR grub-mkconfig -o /boot/grub/grub.cfg
