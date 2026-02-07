@@ -80,38 +80,56 @@ This script downloads and applies a full customization for an XFCE environment, 
       sudo ./xfce.sh /etc/skel
       ```
 
-## 3) `arch.sh` — Automated Arch Linux base install + XFCE
+## 3) `arch.sh` — Automated Arch/Manjaro Linux installation with LUKS + Btrfs + XFCE
 
 ![Arch preview](./doc/arch.png)
 
-Installation script intended to be run from an Arch Linux live environment. It partitions the disk, installs a base system, and sets up a ready-to-use XFCE desktop.
+Automated installation script for Arch Linux or Manjaro Linux following the "Arch Way". It creates a fully encrypted system with Btrfs subvolumes and a ready-to-use XFCE desktop environment.
 
 - What the script does
-    - GPT partitioning of the target disk with `parted`:
-        - `p1` EFI (FAT32, ~500 MiB), `p2` swap (~4 GiB), `p3` Btrfs (rest of the disk).
-    - Creates Btrfs subvolumes `@` and `@home`.
-    - Base install via `pacstrap`: `base`, `linux`, `linux-firmware`, `grub`, `efibootmgr`, `systemd`, `networkmanager`, `sudo`, `pacman`, `flatpak`.
-    - Installs the XFCE environment (panel, apps, plugins, terminal, etc.) + `sway` + `lightdm` and enables `lightdm`.
-    - Applies XFCE/Tmux/Sway configuration to the skeleton (`/etc/skel`) via `xfce.sh`, then adjusts the default icon.
-    - French locale by default: `fr_FR.UTF-8`, keyboard `fr`, timezone `Europe/Paris` (links and `locale-gen`).
-    - Creates a user, adds it to the `sudo` group, sets the password.
-    - Installs shell configuration for everyone via `shell.sh` inside the `chroot`.
-    - Adds the `flathub` remote (Flatpak) for the created user.
-    - Installs and generates GRUB configuration.
+    - **Distribution detection**: Automatically detects Arch or Manjaro live environment and adapts the installation process accordingly.
+    - **GPT partitioning** of the target disk with `parted`:
+        - `p1`: EFI partition (FAT32, 500 MiB)
+        - `p2`: Boot partition (ext4, 500 MiB, unencrypted)
+        - `p3`: Swap partition (~8 GiB)
+        - `p4`: LUKS2-encrypted system (Btrfs, rest of the disk)
+    - **LUKS2 encryption** with PBKDF2 + SHA256 on the main partition.
+    - **Btrfs subvolumes**: `@` (root), `@home`, `@log`, `@cache` for better snapshots and management.
+    - **Base system installation**:
+        - Arch: via `pacstrap` with `linux`, `linux-firmware`, `pulseaudio`
+        - Manjaro: via `basestrap` with `linux618`, extensive firmware packages, `manjaro-system`, themes, and `manjaro-pipewire`
+    - **Desktop environment**: XFCE with LightDM, Sway support, Rio terminal, complete XFCE plugins suite.
+    - **Plymouth**: Graphical boot splash screen with encrypted disk password prompt.
+    - **Network configuration**: NetworkManager + systemd-resolved with custom DNS (OpenDNS, Cloudflare, FDN).
+    - **tmpfs on /tmp**: Temporary files stored in RAM for better performance.
+    - **French locale by default**: `fr_FR.UTF-8`, keyboard layout `fr`, timezone `Europe/Paris`.
+    - **User creation**: Adds user to the `sudo` group with configured password.
+    - **Shell configuration**: Installs `shell.sh` for all users (Bash/Zsh/Fish with custom prompt).
+    - **XFCE/Tmux/Sway theming**: Applies configuration to `/etc/skel` via `xfce.sh`.
+    - **Additional tools**: tmux, xclip, wl-clipboard, fastfetch, curl, wget, zip/unzip, binutils, and Flatpak.
+    - **GRUB bootloader**: Configured with LUKS support, optimal mkinitcpio hooks, and instant boot (timeout=0).
+
+- Architecture features
+    - **Modular design**: Script organized in 13 specialized functions for maintainability.
+    - **NVMe support**: Automatically detects NVMe drives and adjusts partition naming (p1-p4 vs 1-4).
+    - **Error handling**: Uses `set -e` and validates root privileges at startup.
+    - **Distribution-specific logic**: Adapts commands (pacstrap/basestrap, genfstab/fstabgen) and packages based on detected distribution.
 
 - Warnings / Requirements
-    - DANGEROUS: the disk passed as argument will be repartitioned and fully erased (`parted mklabel gpt`). Back up your data before running.
-    - To be used on Arch Linux (installation ISO) only.
-    - Internet connection required.
+    - **DANGEROUS**: The target disk will be completely erased and repartitioned. Back up all data before running.
+    - **Root privileges required**: Script must be run as root.
+    - **Compatible with**: Arch Linux installation ISO or Manjaro installation ISO.
+    - **Internet connection required**: For package downloads and script fetching.
+    - **UEFI system required**: Uses UEFI boot (not legacy BIOS).
 
 - Usage
-    - Run from an Arch live session with root privileges and an Internet connection:
+    - Run from an Arch or Manjaro live session with root privileges:
       ```sh
       # Interactive mode (whiptail dialogs):
-      curl -s https://sh.flavien.io/arch.sh | sh -
-      
-      # Non-interactive mode (4 arguments):
-      # ./arch.sh <HOSTNAME> <DISK> <USERNAME> <PASSWORD>
-      ./arch.sh my-host /dev/sda alice "MyStrongPassword"
+      curl -s https://sh.flavien.io/arch.sh | sudo sh -
+
+      # Non-interactive mode (5 arguments):
+      # ./arch.sh <HOSTNAME> <DISK> <USERNAME> <PASSWORD> <LUKS_PASSWORD>
+      sudo ./arch.sh my-host /dev/sda alice "MyStrongPassword" "MyLuksPassword"
       ```
 
