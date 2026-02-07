@@ -257,20 +257,7 @@ configure_grub() {
 
     sed -i "s|^HOOKS=.*|HOOKS=$HOOKS|" "$INSTALL_DIR/etc/mkinitcpio.conf"
     sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"$GRUB_CMDLINE_LINUX\"|" "$INSTALL_DIR/etc/default/grub"
-
-
-    if [[ "$CD_TYPE" == "arch" ]]
-    then
-        if ! grep -q '^GRUB_ENABLE_CRYPTODISK=' "$INSTALL_DIR/etc/default/grub"
-        then
-            echo "GRUB_ENABLE_CRYPTODISK=y" >> "$INSTALL_DIR/etc/default/grub"
-        else
-            sed -i 's/^GRUB_ENABLE_CRYPTODISK=.*/GRUB_ENABLE_CRYPTODISK=y/' "$INSTALL_DIR/etc/default/grub"
-        fi
-    elif [[ "$CD_TYPE" == "manjaro" ]]
-    then
-        sed -i 's/^GRUB_ENABLE_CRYPTODISK=.*/GRUB_ENABLE_CRYPTODISK=n/' "$INSTALL_DIR/etc/default/grub"
-    fi
+    sed -i 's/^GRUB_ENABLE_CRYPTODISK=.*/GRUB_ENABLE_CRYPTODISK=n/' "$INSTALL_DIR/etc/default/grub"
 
     sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=0/' "$INSTALL_DIR/etc/default/grub"
 
