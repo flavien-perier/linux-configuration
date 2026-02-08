@@ -155,6 +155,7 @@ install_tools() {
         sudo \
         flatpak \
         tmux \
+        openssh \
         xclip \
         wl-clipboard \
         fastfetch \
@@ -206,7 +207,9 @@ install_de() {
         xfdesktop \
         sway \
         xfwm4 \
-        xfwm4-themes
+        xfwm4-themes \
+        libnma \
+        network-manager-applet
 
     $CHROOT systemctl enable lightdm
     $CHROOT systemctl enable seatd
