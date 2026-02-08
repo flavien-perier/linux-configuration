@@ -125,7 +125,7 @@ EOL
 dns=systemd-resolved
 EOL
 
-    cat << EOL > /etc/systemd/resolved.conf
+    cat << EOL > $INSTALL_DIR/etc/systemd/resolved.conf
 [Resolve]
 DNS=208.67.222.222 1.1.1.1 151.80.222.79
 FallbackDNS=208.67.220.220 1.0.0.1
