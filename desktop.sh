@@ -165,7 +165,7 @@ XDG_MUSIC_DIR="$HOME/Music"
 XDG_PICTURES_DIR="$HOME/Pictures"
 XDG_VIDEOS_DIR="$HOME/Videos"
 XDG_PUBLICSHARE_DIR="$HOME/Public"
-XDG_TEMPLATES_DIR="$HOME/Templates"' | tee $HOME_DIR/.config/user-dirs.dirs
+XDG_TEMPLATES_DIR="$HOME/Templates"' > $HOME_DIR/.config/user-dirs.dirs
 }
 
 download_bin_files() {
