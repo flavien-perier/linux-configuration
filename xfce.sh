@@ -108,11 +108,7 @@ apply_xfce_settings() {
 apply_tmux_settings() {
     local HOME_DIR=$1
 
-    if command_exists "tmux" && command_exists "sway"; then
-        curl -Lqs $GITHUB_PROJECT_BASE_URL/tmux.wayland.conf -o $HOME_DIR/.tmux.conf
-    elif command_exists "tmux"; then
-        curl -Lqs $GITHUB_PROJECT_BASE_URL/tmux.x11.conf -o $HOME_DIR/.tmux.conf
-    fi
+    curl -Lqs $GITHUB_PROJECT_BASE_URL/tmux.conf -o $HOME_DIR/.tmux.conf
 }
 
 apply_sway_settings() {
@@ -135,6 +131,54 @@ apply_rio_settings() {
     fi
 }
 
+configure_home_dir() {
+    local HOME_DIR="$1"
+
+    mkdir -p $HOME_DIR/bin
+
+    mv $HOME_DIR/Bureau $HOME_DIR/Desktop 2>/dev/null || true
+    mv $HOME_DIR/Documents $HOME_DIR/Documents 2>/dev/null || true
+    mv $HOME_DIR/Téléchargements $HOME_DIR/Downloads 2>/dev/null || true
+    mv $HOME_DIR/Musique $HOME_DIR/Music 2>/dev/null || true
+    mv $HOME_DIR/Images $HOME_DIR/Pictures 2>/dev/null || true
+    mv $HOME_DIR/Vidéos $HOME_DIR/Videos 2>/dev/null || true
+    mv $HOME_DIR/Public $HOME_DIR/Public 2>/dev/null || true
+    mv $HOME_DIR/Modèles $HOME_DIR/Templates 2>/dev/null || true
+
+    mkdir -p $HOME_DIR/Desktop
+    mkdir -p $HOME_DIR/Documents
+    mkdir -p $HOME_DIR/Downloads
+    mkdir -p $HOME_DIR/Music
+    mkdir -p $HOME_DIR/Pictures
+    mkdir -p $HOME_DIR/Videos
+    mkdir -p $HOME_DIR/Public
+    mkdir -p $HOME_DIR/Templates
+
+    mkdir -p $HOME_DIR/.config
+
+    echo "en_EN" > $HOME_DIR/.config/user-dirs.locale
+
+    echo 'XDG_DESKTOP_DIR="$HOME/Desktop"
+XDG_DOCUMENTS_DIR="$HOME/Documents"
+XDG_DOWNLOAD_DIR="$HOME/Downloads"
+XDG_MUSIC_DIR="$HOME/Music"
+XDG_PICTURES_DIR="$HOME/Pictures"
+XDG_VIDEOS_DIR="$HOME/Videos"
+XDG_PUBLICSHARE_DIR="$HOME/Public"
+XDG_TEMPLATES_DIR="$HOME/Templates"' | tee $HOME_DIR/.config/user-dirs.dirs
+}
+
+download_bin_files() {
+    local HOME_DIR="$1"
+
+    chmod u+w $HOME_DIR/bin
+
+    curl -Lqs $GITHUB_PROJECT_BASE_URL/bin/sh-copy -o $HOME_DIR/bin/sh-copy
+    chmod 500 $HOME_DIR/bin/sh-copy
+
+    chmod u-w $HOME_DIR/bin
+}
+
 main() {
     command_exists "wget" || (echo "wget not found" && exit 1)
     command_exists "curl" || (echo "curl not found" && exit 1)
@@ -151,6 +195,8 @@ main() {
     apply_tmux_settings $HOME_DIR
     apply_sway_settings $SWAY_CONF_DIR
     apply_rio_settings $RIO_CONF_DIR
+    configure_home_dir $HOME_DIR
+    download_bin_files $HOME_DIR
 }
 
 main $*

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [[ $XDG_SESSION_TYPE = "x11" ]]
+then
+    xclip -se c -i "$*"
+else
+    wl-copy "$*"
+fi
