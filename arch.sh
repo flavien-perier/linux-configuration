@@ -165,9 +165,13 @@ install_tools() {
         xz \
         zip \
         unzip \
-        binutils
+        binutils \
+        blueman \
+        bluez \
+        bluez-utils
 
     curl -Lqs https://sh.flavien.io/shell.sh | $CHROOT bash -
+    $CHROOT systemctl enable bluetooth
 }
 
 configure_sudo() {
