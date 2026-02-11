@@ -71,7 +71,7 @@ install_base_packages() {
         pacstrap $INSTALL_DIR $BASE_PACKAGES \
             linux \
             linux-firmware \
-            pulseaudio
+            pipewire
     elif [[ "$CD_TYPE" == "manjaro" ]]
     then
         pacman-mirrors --fasttrack
