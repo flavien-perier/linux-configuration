@@ -2,7 +2,7 @@
 
 if [[ $XDG_SESSION_TYPE = "x11" ]]
 then
-    xclip -se c -i "$*"
+    xclip -se c -i
 else
-    wl-copy "$*"
+    wl-copy
 fi

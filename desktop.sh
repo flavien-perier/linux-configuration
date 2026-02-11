@@ -7,7 +7,7 @@ set -e
 JET_BRAINS_MONO_NERD_VERSION="3.4.0"
 SWEET_DARK_VERSION="6.0"
 
-GITHUB_PROJECT_BASE_URL="https://raw.githubusercontent.com/flavien-perier/linux-configuration/master/xfce"
+GITHUB_PROJECT_BASE_URL="https://raw.githubusercontent.com/flavien-perier/linux-configuration/master/desktop"
 
 command_exists() {
     command -v "$1" >/dev/null 2>&1
