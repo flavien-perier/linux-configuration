@@ -218,7 +218,7 @@ install_de() {
     $CHROOT systemctl enable lightdm
     $CHROOT systemctl enable seatd
 
-    $CHROOT bash <(curl -Lqs https://sh.flavien.io/xfce.sh) /etc/skel
+    $CHROOT bash <(curl -Lqs https://sh.flavien.io/desktop.sh) /etc/skel
     sed -i 's|value="flavien"|value="arch"|g' $INSTALL_DIR/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
 }
 
