@@ -51,7 +51,7 @@ This script installs base tools and configures the three shells `bash`, `zsh`, a
       ./shell.sh
       ```
 
-## 2) `xfce.sh` — XFCE themes, fonts, and settings (plus Sway/Tmux)
+## 2) `desktop.sh` — XFCE themes, fonts, and settings (plus Sway/Tmux)
 
 ![XFCE preview](./doc/xfce.png)
 
@@ -73,11 +73,11 @@ This script downloads and applies a full customization for an XFCE environment, 
 - Usage
     - For the current user’s home directory:
       ```sh
-      curl -s https://sh.flavien.io/xfce.sh | sh -
+      curl -s https://sh.flavien.io/desktop.sh | sh -
       ```
     - To prepare a `/etc/skel` skeleton (useful for future users):
       ```sh
-      sudo ./xfce.sh /etc/skel
+      sudo ./desktop.sh /etc/skel
       ```
 
 ## 3) `arch.sh` — Automated Arch/Manjaro Linux installation with LUKS + Btrfs + XFCE
@@ -105,7 +105,7 @@ Automated installation script for Arch Linux or Manjaro Linux following the "Arc
     - **French locale by default**: `fr_FR.UTF-8`, keyboard layout `fr`, timezone `Europe/Paris`.
     - **User creation**: Adds user to the `sudo` group with configured password.
     - **Shell configuration**: Installs `shell.sh` for all users (Bash/Zsh/Fish with custom prompt).
-    - **XFCE/Tmux/Sway theming**: Applies configuration to `/etc/skel` via `xfce.sh`.
+    - **XFCE/Tmux/Sway theming**: Applies configuration to `/etc/skel` via `desktop.sh`.
     - **Additional tools**: tmux, xclip, wl-clipboard, fastfetch, curl, wget, zip/unzip, binutils, and Flatpak.
     - **GRUB bootloader**: Configured with LUKS support, optimal mkinitcpio hooks, and instant boot (timeout=0).
 

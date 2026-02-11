@@ -126,7 +126,7 @@ apply_rio_settings() {
     local CONF_DIR=$1
 
     if command_exists "rio"; then
-        mkdir $CONF_DIR
+        mkdir -p $CONF_DIR
         curl -Lqs $GITHUB_PROJECT_BASE_URL/rio.conf -o $CONF_DIR/config.toml
     fi
 }
