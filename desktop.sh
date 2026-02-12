@@ -89,32 +89,41 @@ download_themes() {
 apply_xfce_settings() {
     local CONF_DIR=$1
 
-    mkdir -p $CONF_DIR
+    if command_exists "xfce4-session"
+    then
+        mkdir -p $CONF_DIR
 
-    curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfce4-keyboard-shortcuts.xml -o $CONF_DIR/xfce4-keyboard-shortcuts.xml
-    curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfce4-panel.xml -o $CONF_DIR/xfce4-panel.xml
-    curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfce4-terminal.xml -o $CONF_DIR/xfce4-terminal.xml
-    curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfwm4.xml -o $CONF_DIR/xfwm4.xml
-    curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xsettings.xml -o $CONF_DIR/xsettings.xml
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfce4-keyboard-shortcuts.xml -o $CONF_DIR/xfce4-keyboard-shortcuts.xml
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfce4-panel.xml -o $CONF_DIR/xfce4-panel.xml
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfce4-terminal.xml -o $CONF_DIR/xfce4-terminal.xml
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfwm4.xml -o $CONF_DIR/xfwm4.xml
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xsettings.xml -o $CONF_DIR/xsettings.xml
 
-    if ! command_exists "tmux"; then
-        sed -i \
-            -e 's|<property name="run-custom-command" type="bool" value="true"/>|<property name="run-custom-command" type="bool" value="false"/>|g' \
-            -e 's|<property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_NONE"/>|<property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_RIGHT"/>|g'p \
-            $CONF_DIR/xfce4-terminal.xml
+        if ! command_exists "tmux"
+        then
+            # Modifies the xfce terminal configuration to use tmux
+            sed -i \
+                -e 's|<property name="run-custom-command" type="bool" value="true"/>|<property name="run-custom-command" type="bool" value="false"/>|g' \
+                -e 's|<property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_NONE"/>|<property name="scrolling-bar" type="string" value="TERMINAL_SCROLLBAR_RIGHT"/>|g'p \
+                $CONF_DIR/xfce4-terminal.xml
+        fi
     fi
 }
 
 apply_tmux_settings() {
     local HOME_DIR=$1
 
-    curl -Lqs $GITHUB_PROJECT_BASE_URL/tmux.conf -o $HOME_DIR/.tmux.conf
+    if command_exists "sway"
+    then
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/tmux.conf -o $HOME_DIR/.tmux.conf
+    fi
 }
 
 apply_sway_settings() {
     local CONF_DIR=$1
 
-    if command_exists "sway"; then
+    if command_exists "sway"
+    then
         mkdir -p $CONF_DIR/config.d
         curl -Lqs $GITHUB_PROJECT_BASE_URL/sway/config -o $CONF_DIR/config
         curl -Lqs $GITHUB_PROJECT_BASE_URL/sway/config.d/keyboard -o $CONF_DIR/config.d/keyboard
@@ -125,7 +134,8 @@ apply_sway_settings() {
 apply_rio_settings() {
     local CONF_DIR=$1
 
-    if command_exists "rio"; then
+    if command_exists "rio"
+    then
         mkdir -p $CONF_DIR
         curl -Lqs $GITHUB_PROJECT_BASE_URL/rio.conf -o $CONF_DIR/config.toml
     fi

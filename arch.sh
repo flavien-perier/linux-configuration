@@ -6,13 +6,67 @@ set -e
 
 SCRIPT_TITLE="Arch configuration"
 
-create_partitions() {
-    parted --script $DISK mklabel gpt
-    parted --script $DISK mkpart primary 1MiB 501MiB
-    parted --script $DISK mkpart primary 501MiB 1001MiB
-    parted --script $DISK mkpart primary 1001MiB 9001Mib
-    parted --script $DISK mkpart primary 9001Mib 100%
+print_error() {
+    local ERROR_MESSAGE="$1"
 
+    echo "$ERROR_MESSAGE" 1>&2
+    whiptail --title "$SCRIPT_TITLE" --msgbox "$ERROR_MESSAGE" 10 50
+}
+
+install_menu() {
+    local RETRY_PASSWORD
+    local RETRY_LUKS_PASSWORD
+
+    if [[ $# -eq 6 ]]
+    then
+        DISK=$1
+        RESET_DISK=$2
+        HOSTNAME=$3
+        USERNAME=$4
+        PASSWORD=$5
+        LUKS_PASSWORD=$6
+    else
+        DISK=$(whiptail --title "$SCRIPT_TITLE" --inputbox "Disk used for install" 10 50 3>&1 1>&2 2>&3)
+
+        if whiptail --title "$SCRIPT_TITLE" --yesno "Format the disk, or reinstall the operating system ?" --yes-button "Format" --no-button "Reset OS" 10 50
+        then
+            RESET_DISK=1
+        else
+            RESET_DISK=0
+        fi
+
+        HOSTNAME=$(whiptail --title "$SCRIPT_TITLE" --inputbox "Hostname" 10 50 3>&1 1>&2 2>&3)
+        USERNAME=$(whiptail --title "$SCRIPT_TITLE" --inputbox "Username" 10 50 3>&1 1>&2 2>&3)
+
+        while true
+        do
+            PASSWORD=$(whiptail --title "$SCRIPT_TITLE" --passwordbox "Password" 10 50 3>&1 1>&2 2>&3)
+            RETRY_PASSWORD=$(whiptail --title "$SCRIPT_TITLE" --passwordbox "Retry Password" 10 50 3>&1 1>&2 2>&3)
+
+            if [[ "$PASSWORD" = "$RETRY_PASSWORD" ]]
+            then
+                break
+            else
+                print_error "The passwords are not identical. Please try again."
+            fi
+        done
+
+        while true
+        do
+            LUKS_PASSWORD=$(whiptail --title "$SCRIPT_TITLE" --passwordbox "LUKS password" 10 50 3>&1 1>&2 2>&3)
+            RETRY_LUKS_PASSWORD=$(whiptail --title "$SCRIPT_TITLE" --passwordbox "Retry LUKS password" 10 50 3>&1 1>&2 2>&3)
+
+            if [[ "$LUKS_PASSWORD" = "$RETRY_LUKS_PASSWORD" ]]
+            then
+                break
+            else
+                print_error "The passwords are not identical. Please try again."
+            fi
+        done
+    fi
+}
+
+create_partitions() {
     if [[ $DISK == /dev/nvme* ]]
     then
         DISK1=${DISK}p1
@@ -26,24 +80,48 @@ create_partitions() {
         DISK4=${DISK}4
     fi
 
-    mkfs.fat -F32 $DISK1
-    mkfs.ext4 $DISK2
-    mkswap $DISK3
+    if [[ $RESET_DISK -eq 1 ]]
+    then
+        parted --script $DISK mklabel gpt
+        parted --script $DISK mkpart primary 1MiB 501MiB
+        parted --script $DISK mkpart primary 501MiB 1001MiB
+        parted --script $DISK mkpart primary 1001MiB 9001Mib
+        parted --script $DISK mkpart primary 9001Mib 100%
 
-    echo -n "$LUKS_PASSWORD" | cryptsetup luksFormat --type luks2 --pbkdf pbkdf2 --hash sha256 --batch-mode --key-file=- $DISK4
-    echo -n "$LUKS_PASSWORD" | cryptsetup luksOpen --key-file=- $DISK4 system
+        mkfs.fat -F32 $DISK1
+        mkfs.ext4 $DISK2
+        mkswap $DISK3
 
-    mkfs.btrfs -f /dev/mapper/system
+        echo -n "$LUKS_PASSWORD" | cryptsetup luksFormat --type luks2 --pbkdf pbkdf2 --hash sha256 --batch-mode --key-file=- $DISK4
+        echo -n "$LUKS_PASSWORD" | cryptsetup luksOpen --key-file=- $DISK4 system
 
-    swapon $DISK3
+        mkfs.btrfs -f /dev/mapper/system
 
-    mount /dev/mapper/system $INSTALL_DIR
-    btrfs subvolume create $INSTALL_DIR/@
-    btrfs subvolume create $INSTALL_DIR/@home
-    btrfs subvolume create $INSTALL_DIR/@log
-    btrfs subvolume create $INSTALL_DIR/@cache
-    umount $INSTALL_DIR
+        swapon $DISK3
 
+        mount /dev/mapper/system $INSTALL_DIR
+        btrfs subvolume create $INSTALL_DIR/@
+        btrfs subvolume create $INSTALL_DIR/@home
+        btrfs subvolume create $INSTALL_DIR/@log
+        btrfs subvolume create $INSTALL_DIR/@cache
+        umount $INSTALL_DIR
+    else
+        mkfs.fat -F32 $DISK1
+        mkfs.ext4 $DISK2
+        mkswap $DISK3
+
+        echo -n "$LUKS_PASSWORD" | cryptsetup luksOpen --key-file=- $DISK4 system
+
+        mount /dev/mapper/system $INSTALL_DIR
+        btrfs subvolume delete -R $INSTALL_DIR/@
+        btrfs subvolume create $INSTALL_DIR/@
+        btrfs subvolume delete -R $INSTALL_DIR/@cache
+        btrfs subvolume create $INSTALL_DIR/@cache
+        umount $INSTALL_DIR
+    fi
+}
+
+mount_partitions() {
     mount -o defaults,discard=async,ssd,subvol=@ /dev/mapper/system $INSTALL_DIR
 
     mkdir -p $INSTALL_DIR/tmp
@@ -150,12 +228,6 @@ configure_fstab() {
     echo "tmpfs /tmp tmpfs defaults,noatime,mode=1777 0 0" >> $INSTALL_DIR/etc/fstab
 }
 
-create_user() {
-    $CHROOT useradd -m $USERNAME
-    $CHROOT usermod -a -G sudo $USERNAME
-    echo "$USERNAME:$PASSWORD" | $CHROOT chpasswd
-}
-
 install_tools() {
     $CHROOT pacman --noconfirm -Sy \
         sudo \
@@ -176,9 +248,9 @@ install_tools() {
         bluez \
         bluez-utils
 
-    curl -Lqs https://sh.flavien.io/shell.sh | $CHROOT bash -
     $CHROOT systemctl enable bluetooth
 }
+
 
 configure_sudo() {
     echo "%sudo	ALL=(ALL:ALL) ALL" >> $INSTALL_DIR/etc/sudoers
@@ -226,6 +298,14 @@ install_de() {
 
     $CHROOT bash <(curl -Lqs https://sh.flavien.io/desktop.sh) /etc/skel
     sed -i 's|value="flavien"|value="arch"|g' $INSTALL_DIR/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+}
+
+create_user() {
+    $CHROOT useradd -m $USERNAME
+    $CHROOT usermod -a -G sudo $USERNAME
+    echo "$USERNAME:$PASSWORD" | $CHROOT chpasswd
+
+    curl -Lqs https://sh.flavien.io/shell.sh | $CHROOT bash -
 }
 
 configure_local() {
@@ -277,7 +357,7 @@ main() {
     # Check if running as root
     if [[ "$EUID" -ne 0 ]]
     then
-        whiptail --title "$SCRIPT_TITLE" --msgbox "This script must be run as root" 10 50
+        print_error "This script must be run as root"
         exit 1
     fi
 
@@ -292,24 +372,11 @@ main() {
         CD_TYPE="manjaro"
         CHROOT="manjaro-chroot $INSTALL_DIR"
     else
-        whiptail --title "$SCRIPT_TITLE" --msgbox "Unsupported distribution cd" 10 50
+        print_error "Unsupported distribution cd"
         exit 1
     fi
 
-    if [[ $# -eq 5 ]]
-    then
-        HOSTNAME=$1
-        DISK=$2
-        USERNAME=$3
-        PASSWORD=$4
-        LUKS_PASSWORD=$5
-    else
-        HOSTNAME=$(whiptail --title "$SCRIPT_TITLE" --inputbox "Hostname" 10 50 3>&1 1>&2 2>&3)
-        DISK=$(whiptail --title "$SCRIPT_TITLE" --inputbox "Disk used for install" 10 50 3>&1 1>&2 2>&3)
-        USERNAME=$(whiptail --title "$SCRIPT_TITLE" --inputbox "Username" 10 50 3>&1 1>&2 2>&3)
-        PASSWORD=$(whiptail --title "$SCRIPT_TITLE" --passwordbox "Password" 10 50 3>&1 1>&2 2>&3)
-        LUKS_PASSWORD=$(whiptail --title "$SCRIPT_TITLE" --passwordbox "LUKS password" 10 50 3>&1 1>&2 2>&3)
-    fi
+    install_menu $*
 
     ip link
     timedatectl set-ntp true
@@ -318,14 +385,15 @@ main() {
     pacman -Sy --noconfirm archlinux-keyring ca-certificates ca-certificates-utils
 
     create_partitions
+    mount_partitions
     install_base_packages
     configure_hostname
     configure_network
     configure_fstab
-    create_user
     install_tools
     configure_sudo
     install_de
+    create_user
     configure_local
     configure_grub
 }
