@@ -150,6 +150,12 @@ configure_fstab() {
     echo "tmpfs /tmp tmpfs defaults,noatime,mode=1777 0 0" >> $INSTALL_DIR/etc/fstab
 }
 
+create_user() {
+    $CHROOT useradd -m $USERNAME
+    $CHROOT usermod -a -G sudo $USERNAME
+    echo "$USERNAME:$PASSWORD" | $CHROOT chpasswd
+}
+
 install_tools() {
     $CHROOT pacman --noconfirm -Sy \
         sudo \
@@ -239,12 +245,6 @@ EndSection
 EOL
 }
 
-create_user() {
-    $CHROOT useradd -m $USERNAME
-    $CHROOT usermod -a -G sudo $USERNAME
-    echo "$USERNAME:$PASSWORD" | $CHROOT chpasswd
-}
-
 configure_grub() {
     local DISK4_UUID
     DISK4_UUID=$(blkid -s UUID -o value "$DISK4")
@@ -322,11 +322,11 @@ main() {
     configure_hostname
     configure_network
     configure_fstab
+    create_user
     install_tools
     configure_sudo
     install_de
     configure_local
-    create_user
     configure_grub
 }
 
