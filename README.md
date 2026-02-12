@@ -122,14 +122,19 @@ Automated installation script for Arch Linux or Manjaro Linux following the "Arc
     - **Internet connection required**: For package downloads and script fetching.
     - **UEFI system required**: Uses UEFI boot (not legacy BIOS).
 
+- Installation modes
+    - **Format mode**: Completely wipes the disk, creates new partitions, and installs everything from scratch.
+    - **Reset OS mode**: Preserves the `/home` partition and LUKS encryption, recreates only the root (`@`) and cache (`@cache`) Btrfs subvolumes. Useful for reinstalling the OS while keeping user data.
+
 - Usage
     - Run from an Arch or Manjaro live session with root privileges:
       ```sh
       # Interactive mode (whiptail dialogs):
       curl -s https://sh.flavien.io/arch.sh | sudo sh -
 
-      # Non-interactive mode (5 arguments):
-      # ./arch.sh <HOSTNAME> <DISK> <USERNAME> <PASSWORD> <LUKS_PASSWORD>
-      sudo ./arch.sh my-host /dev/sda alice "MyStrongPassword" "MyLuksPassword"
+      # Non-interactive mode (6 arguments):
+      # ./arch.sh <DISK> <RESET_DISK> <HOSTNAME> <USERNAME> <PASSWORD> <LUKS_PASSWORD>
+      # RESET_DISK: 1 = Format entire disk, 0 = Reset OS only (keep /home)
+      sudo ./arch.sh /dev/sda 1 my-host alice "MyStrongPassword" "MyLuksPassword"
       ```
 
