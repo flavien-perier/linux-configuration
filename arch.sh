@@ -244,6 +244,7 @@ install_tools() {
         zip \
         unzip \
         binutils \
+        pavucontrol \
         blueman \
         bluez \
         bluez-utils
