@@ -245,6 +245,12 @@ install_tools() {
         unzip \
         binutils \
         pavucontrol \
+        pipewire-pulse \
+        pipewire-alsa \
+        wireplumber \
+        alsa-utils \
+        bolt \
+        tbtools \
         blueman \
         bluez \
         bluez-utils
