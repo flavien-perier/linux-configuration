@@ -184,6 +184,14 @@ install_base_packages() {
     fi
 }
 
+copy_NetworkManager_configuration() {
+    if [[ -d /etc/NetworkManager/system-connections ]]
+    then
+        mkdir -p $INSTALL_DIR/etc/NetworkManager
+        cp -R /etc/NetworkManager/system-connections $INSTALL_DIR/etc/NetworkManager
+    fi
+}
+
 configure_hostname() {
     echo "$HOSTNAME" > $INSTALL_DIR/etc/hostname
 }
@@ -398,6 +406,7 @@ main() {
     create_partitions
     mount_partitions
     install_base_packages
+    copy_NetworkManager_configuration
     configure_hostname
     configure_network
     configure_fstab
