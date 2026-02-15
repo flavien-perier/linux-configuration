@@ -229,33 +229,37 @@ configure_fstab() {
 }
 
 install_tools() {
+    local SOUND_PACKAGES="pavucontrol pipewire-pulse pipewire-alsa wireplumber alsa-utils"
+    local COMPRESSION_PACKAGES="xz zip unzip 7zip unrar"
+    local TLP_PACKAGES="tlp tlpui"
+    local BLUETOOTH_PACKAGES="blueman bluez bluez-utils"
+    local THUNDERBOLT_PCKAGES="bolt tbtools"
+    local CLIPBOARD_PACKAGES="xclip wl-clipboard"
+
     $CHROOT pacman --noconfirm -Sy \
         sudo \
         flatpak \
+        xdg-desktop-portal-gtk \
         tmux \
         openssh \
-        xclip \
-        wl-clipboard \
         fastfetch \
         inetutils \
         curl \
         wget \
-        xz \
-        zip \
-        unzip \
         binutils \
-        pavucontrol \
-        pipewire-pulse \
-        pipewire-alsa \
-        wireplumber \
-        alsa-utils \
-        bolt \
-        tbtools \
-        blueman \
-        bluez \
-        bluez-utils
+        acpi \
+        fwupd \
+        $SOUND_PACKAGES \
+        $COMPRESSION_PACKAGES \
+        $TLP_PACKAGES \
+        $BLUETOOTH_PACKAGES \
+        $THUNDERBOLT_PCKAGES \
+        $CLIPBOARD_PACKAGES
 
+    $CHROOT systemctl enable tlp
+    $CHROOT systemctl enable fwupd
     $CHROOT systemctl enable bluetooth
+    $CHROOT systemctl enable systemd-timesyncd
 }
 
 
