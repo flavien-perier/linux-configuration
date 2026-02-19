@@ -93,11 +93,20 @@ apply_xfce_settings() {
     then
         mkdir -p $CONF_DIR
 
-        curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfce4-keyboard-shortcuts.xml -o $CONF_DIR/xfce4-keyboard-shortcuts.xml
-        curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfce4-panel.xml -o $CONF_DIR/xfce4-panel.xml
-        curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfce4-terminal.xml -o $CONF_DIR/xfce4-terminal.xml
-        curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xfwm4.xml -o $CONF_DIR/xfwm4.xml
-        curl -Lqs $GITHUB_PROJECT_BASE_URL/xconf/xsettings.xml -o $CONF_DIR/xsettings.xml
+        rm -f $CONF_DIR/xfce4-keyboard-shortcuts.xml
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/xfce/xfce4-keyboard-shortcuts.xml -o $CONF_DIR/xfce4-keyboard-shortcuts.xml
+
+        rm -f $CONF_DIR/xfce4-panel.xml
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/xfce/xfce4-panel.xml -o $CONF_DIR/xfce4-panel.xml
+
+        rm -f $CONF_DIR/xfce4-terminal.xml
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/xfce/xfce4-terminal.xml -o $CONF_DIR/xfce4-terminal.xml
+
+        rm -f $CONF_DIR/xfwm4.xml
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/xfce/xfwm4.xml -o $CONF_DIR/xfwm4.xml
+
+        rm -f $CONF_DIR/xsettings.xml
+        curl -Lqs $GITHUB_PROJECT_BASE_URL/xfce/xsettings.xml -o $CONF_DIR/xsettings.xml
 
         if ! command_exists "tmux"
         then
@@ -115,6 +124,7 @@ apply_tmux_settings() {
 
     if command_exists "sway"
     then
+        rm -f $HOME_DIR/.tmux.conf
         curl -Lqs $GITHUB_PROJECT_BASE_URL/tmux.conf -o $HOME_DIR/.tmux.conf
     fi
 }
@@ -125,8 +135,14 @@ apply_sway_settings() {
     if command_exists "sway"
     then
         mkdir -p $CONF_DIR/config.d
+
+        rm -f $CONF_DIR/config
         curl -Lqs $GITHUB_PROJECT_BASE_URL/sway/config -o $CONF_DIR/config
+
+        rm -f $CONF_DIR/config.d/keyboard
         curl -Lqs $GITHUB_PROJECT_BASE_URL/sway/config.d/keyboard -o $CONF_DIR/config.d/keyboard
+
+        rm -f $CONF_DIR/config.d/theme
         curl -Lqs $GITHUB_PROJECT_BASE_URL/sway/config.d/theme -o $CONF_DIR/config.d/theme
     fi
 }
@@ -137,6 +153,8 @@ apply_rio_settings() {
     if command_exists "rio"
     then
         mkdir -p $CONF_DIR
+
+        rm -f $CONF_DIR/config.toml
         curl -Lqs $GITHUB_PROJECT_BASE_URL/rio.conf -o $CONF_DIR/config.toml
     fi
 }
@@ -181,12 +199,12 @@ XDG_TEMPLATES_DIR="$HOME/Templates"' > $HOME_DIR/.config/user-dirs.dirs
 download_bin_files() {
     local HOME_DIR="$1"
 
-    chmod u+w $HOME_DIR/bin
+    chmod u+w -R $HOME_DIR/bin
 
     curl -Lqs $GITHUB_PROJECT_BASE_URL/bin/sh-copy -o $HOME_DIR/bin/sh-copy
     chmod 500 $HOME_DIR/bin/sh-copy
 
-    chmod u-w $HOME_DIR/bin
+    chmod u-w -R $HOME_DIR/bin
 }
 
 main() {

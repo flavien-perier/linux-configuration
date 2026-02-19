@@ -1,6 +1,6 @@
 bindsym $mod exec xfce4-popup-whiskermenu
-bindsym $mod+Return exec exo-open --launch TerminalEmulator
-bindsym $mod+b exec exo-open --launch WebBrowser
+bindsym $mod+Return rio
+bindsym $mod+b exec exo-open --launch WebBrowser "https://www.google.com/"
 bindsym $mod+m exec exo-open --launch MailReader
 bindsym $mod+f exec exo-open --launch FileManager
 bindsym $mod+v exec virt-manager
@@ -8,8 +8,8 @@ bindsym $mod+k exec /usr/bin/flatpak run --socket=ssh-auth --branch=stable --arc
 bindsym $mod+l exec xfce4-session-logout --switch-user
 
 bindsym $mod+Shift+q kill
-bindsym Mod1+F4 kill
 bindsym $mod+Shift+c reload
+bindsym $mod+Shift+f fullscreen
 
 floating_modifier $mod normal
 
@@ -25,6 +25,11 @@ bindsym $mod+Shift+Down move down
 bindsym $mod+Shift+Up move up
 bindsym $mod+Shift+Right move right
 
+bindsym $mod+Ctrl+Left workspace prev
+bindsym $mod+Ctrl+Right workspace next
+bindsym $mod+Ctrl+Shift+Left move container to workspace prev
+bindsym $mod+Ctrl+Shift+Right move container to workspace next
+
 bindsym $mod+Shift+h splith
 bindsym $mod+Shift+v splitv
 
@@ -32,7 +37,6 @@ bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
 
-bindsym Ctrl+Mod1+f fullscreen
 bindsym $mod+Shift+space floating toggle
 bindsym $mod+space focus mode_toggle
 bindsym $mod+a focus parent
