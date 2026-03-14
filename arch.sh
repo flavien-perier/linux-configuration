@@ -83,10 +83,10 @@ create_partitions() {
     if [[ $RESET_DISK -eq 1 ]]
     then
         parted --script $DISK mklabel gpt
-        parted --script $DISK mkpart primary 1MiB 501MiB
-        parted --script $DISK mkpart primary 501MiB 1001MiB
-        parted --script $DISK mkpart primary 1001MiB 9001Mib
-        parted --script $DISK mkpart primary 9001Mib 100%
+        parted --script $DISK mkpart primary 1MiB 1GiB
+        parted --script $DISK mkpart primary 1GiB 2GiB
+        parted --script $DISK mkpart primary 2GiB 10Gib
+        parted --script $DISK mkpart primary 10Gib 100%
 
         mkfs.fat -F32 $DISK1
         mkfs.ext4 $DISK2
@@ -240,6 +240,7 @@ install_tools() {
     local SOUND_PACKAGES="pavucontrol pipewire-pulse pipewire-alsa wireplumber alsa-utils"
     local COMPRESSION_PACKAGES="xz zip unzip 7zip unrar"
     local TLP_PACKAGES="tlp tlpui"
+    local SECURITY_PACKAGES="libfido2 gnome-keyring"
     local BLUETOOTH_PACKAGES="blueman bluez bluez-utils"
     local THUNDERBOLT_PCKAGES="bolt tbtools"
     local CLIPBOARD_PACKAGES="xclip wl-clipboard"
@@ -252,20 +253,25 @@ install_tools() {
         openssh \
         fastfetch \
         inetutils \
+        cronie \
         curl \
         wget \
         binutils \
         acpi \
         fwupd \
+        gvfs \
+        mtpfs \
         $SOUND_PACKAGES \
         $COMPRESSION_PACKAGES \
         $TLP_PACKAGES \
+        $SECURITY_PACKAGES \
         $BLUETOOTH_PACKAGES \
         $THUNDERBOLT_PCKAGES \
         $CLIPBOARD_PACKAGES
 
     $CHROOT systemctl enable tlp
     $CHROOT systemctl enable fwupd
+    $CHROOT systemctl enable cronie
     $CHROOT systemctl enable bluetooth
     $CHROOT systemctl enable systemd-timesyncd
 }
@@ -309,6 +315,7 @@ install_de() {
         sway \
         xfwm4 \
         xfwm4-themes \
+        mugshot \
         libnma \
         network-manager-applet
 
