@@ -213,8 +213,8 @@ EOL
 
     cat << EOL > $INSTALL_DIR/etc/systemd/resolved.conf
 [Resolve]
-DNS=208.67.222.222 1.1.1.1 151.80.222.79
-FallbackDNS=208.67.220.220 1.0.0.1
+DNS=1.1.1.1 194.242.2.2 94.247.43.254
+FallbackDNS=1.0.0.1 152.53.15.127
 EOL
 
     rm -f $INSTALL_DIR/etc/resolv.conf
