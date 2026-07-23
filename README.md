@@ -4,7 +4,7 @@
 
 ## 1) `shell.sh` — User shell configuration
 
-![Shell preview](./doc/shell.png)
+![Shell preview](./docs/shell.png)
 
 This script installs base tools and configures the three shells `bash`, `zsh`, and `fish` to provide a consistent prompt.
 
@@ -53,7 +53,7 @@ This script installs base tools and configures the three shells `bash`, `zsh`, a
 
 ## 2) `desktop.sh` — XFCE themes, fonts, and settings (plus Sway/Tmux)
 
-![XFCE preview](./doc/xfce.png)
+![XFCE preview](./docs/xfce.png)
 
 This script downloads and applies a full customization for an XFCE environment, with optional settings for Sway and tmux when available.
 
@@ -82,7 +82,7 @@ This script downloads and applies a full customization for an XFCE environment, 
 
 ## 3) `arch.sh` — Automated Arch/Manjaro Linux installation with LUKS + Btrfs + XFCE
 
-![Arch preview](./doc/arch.png)
+![Arch preview](./docs/arch.png)
 
 Automated installation script for Arch Linux or Manjaro Linux following the "Arch Way". It creates a fully encrypted system with Btrfs subvolumes and a ready-to-use XFCE desktop environment.
 
