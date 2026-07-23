@@ -9,6 +9,8 @@ SWEET_DARK_VERSION="6.0"
 
 GITHUB_PROJECT_BASE_URL="https://raw.githubusercontent.com/flavien-perier/linux-configuration/master/desktop"
 
+ICONS="flavien arch debian fedora manjaro redhat ubuntu"
+
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
@@ -61,9 +63,10 @@ download_themes() {
     gtk-update-icon-cache $ICONS_DIR/Papirus-Dark/ || echo "Papirus-Dark theme optimisation failed"
     gtk-update-icon-cache $ICONS_DIR/Sweet-Rainbow/ || echo "Sweet-Rainbow theme optimisation failed"
 
-    wget $GITHUB_PROJECT_BASE_URL/icons/flavien.png -O $ICONS_DIR/flavien.png
-    wget $GITHUB_PROJECT_BASE_URL/icons/manjaro.png -O $ICONS_DIR/manjaro.png
-    wget $GITHUB_PROJECT_BASE_URL/icons/arch.png -O $ICONS_DIR/arch.png
+    for ICON in $ICONS
+    do
+        wget "$GITHUB_PROJECT_BASE_URL/icons/${ICON}.svg" -O "$ICONS_DIR/$ICON.svg"
+    done
 
     # Themes
     chmod -R 700 $THEMES_DIR || echo "No themes dir"
@@ -219,6 +222,7 @@ main() {
     local RIO_CONF_DIR="$HOME_DIR/.config/rio"
 
     download_themes $HOME_DIR
+    exit 0
     apply_xfce_settings $XFCE_CONF_DIR
     apply_tmux_settings $HOME_DIR
     apply_sway_settings $SWAY_CONF_DIR
