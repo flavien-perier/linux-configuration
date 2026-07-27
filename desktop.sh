@@ -222,7 +222,6 @@ main() {
     local RIO_CONF_DIR="$HOME_DIR/.config/rio"
 
     download_themes $HOME_DIR
-    exit 0
     apply_xfce_settings $XFCE_CONF_DIR
     apply_tmux_settings $HOME_DIR
     apply_sway_settings $SWAY_CONF_DIR
