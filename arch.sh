@@ -256,6 +256,7 @@ install_tools() {
         cronie \
         curl \
         wget \
+        less \
         binutils \
         acpi \
         fwupd \
