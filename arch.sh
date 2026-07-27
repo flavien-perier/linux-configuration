@@ -240,7 +240,7 @@ install_tools() {
     local SOUND_PACKAGES="pavucontrol pipewire-pulse pipewire-alsa wireplumber alsa-utils"
     local COMPRESSION_PACKAGES="xz zip unzip 7zip unrar"
     local TLP_PACKAGES="tlp tlpui"
-    local SECURITY_PACKAGES="libfido2 gnome-keyring"
+    local SECURITY_PACKAGES="libfido2 gnome-keyring apparmor"
     local BLUETOOTH_PACKAGES="blueman bluez bluez-utils"
     local THUNDERBOLT_PCKAGES="bolt tbtools"
     local CLIPBOARD_PACKAGES="xclip wl-clipboard"
@@ -272,6 +272,7 @@ install_tools() {
     $CHROOT systemctl enable tlp
     $CHROOT systemctl enable fwupd
     $CHROOT systemctl enable cronie
+    $CHROOT systemctl enable apparmor
     $CHROOT systemctl enable bluetooth
     $CHROOT systemctl enable systemd-timesyncd
 }
@@ -357,15 +358,16 @@ configure_grub() {
 
     local HOOKS
     local GRUB_CMDLINE_LINUX
+    local LSM="lsm=landlock,lockdown,yama,integrity,apparmor,bpf"
 
     if [[ "$CD_TYPE" == "arch" ]]
     then
         HOOKS="(base udev plymouth autodetect modconf kms keyboard keymap block encrypt btrfs filesystems fsck)"
-        GRUB_CMDLINE_LINUX="cryptdevice=UUID=${DISK4_UUID}:system root=/dev/mapper/system rootflags=subvol=@ quiet splash"
+        GRUB_CMDLINE_LINUX="cryptdevice=UUID=${DISK4_UUID}:system root=/dev/mapper/system rootflags=subvol=@ $LSM quiet splash"
     elif [[ "$CD_TYPE" == "manjaro" ]]
     then
         HOOKS="(base systemd autodetect modconf kms keyboard sd-vconsole plymouth block sd-encrypt btrfs filesystems fsck)"
-        GRUB_CMDLINE_LINUX="rd.luks.name=${DISK4_UUID}=system root=/dev/mapper/system rootflags=subvol=@ quiet splash"
+        GRUB_CMDLINE_LINUX="rd.luks.name=${DISK4_UUID}=system root=/dev/mapper/system rootflags=subvol=@ $LSM quiet splash"
     fi
 
     sed -i "s|^HOOKS=.*|HOOKS=$HOOKS|" "$INSTALL_DIR/etc/mkinitcpio.conf"
