@@ -420,44 +420,44 @@ print_user_paths() {
 print_alias_list() {
     echo "# Alias list"
 
-echo "## ls aliases"
-if command_exists eza
-then
-    echo 'alias ls="eza"
-alias ll="eza -aalgM --time-style=long-iso --git --color-scale"
+    echo "## ls aliases"
+    if command_exists eza
+    then
+        echo 'alias ls="eza"
+alias ll="eza -aalgM --time-style=long-iso --git --color-scale=all"
 alias dir="eza"'
-else
-    echo 'alias ls="ls --color=auto"
+    else
+        echo 'alias ls="ls --color=auto"
 alias ll="ls -alh --time-style=\"+%Y-%m-%d %H:%M\""
 alias dir="dir --color=auto"'
-fi
+    fi
 
-echo "## vi aliases"
-if command_exists nvim
-then
-    echo 'alias vi="nvim"'
-else
-    echo 'alias vi="vim"'
-fi
+    echo "## vi aliases"
+    if command_exists nvim
+    then
+        echo 'alias vi="nvim"'
+    else
+        echo 'alias vi="vim"'
+    fi
 
-if command_exists batcat
-then
-    echo "## bat aliases"
-    echo 'alias bat="batcat"'
-fi
+    if command_exists batcat
+    then
+        echo "## bat aliases"
+        echo 'alias bat="batcat"'
+    fi
 
-echo '## grep coloration
+    echo '## grep coloration
 alias grep="grep --color=auto"
 alias fgrep="fgrep --color=auto"
 alias egrep="egrep --color=auto"
 alias rg="rg --color=auto"'
 
-echo '## Human readable aliases
+    echo '## Human readable aliases
 alias df="df -h"
 alias du="du -hs"
 alias free="free -h"'
 
-echo '## Change shell
+    echo '## Change shell
 alias use-bash="exec bash"
 alias use-fish="exec fish"
 alias use-zsh="exec zsh"'
