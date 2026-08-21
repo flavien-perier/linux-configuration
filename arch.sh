@@ -258,6 +258,7 @@ install_tools() {
         wget \
         less \
         binutils \
+        nftables \
         acpi \
         fwupd \
         gvfs \
