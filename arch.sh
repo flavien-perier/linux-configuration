@@ -274,6 +274,7 @@ install_tools() {
     $CHROOT systemctl enable tlp
     $CHROOT systemctl enable fwupd
     $CHROOT systemctl enable cronie
+    $CHROOT systemctl enable nftables
     $CHROOT systemctl enable apparmor
     $CHROOT systemctl enable bluetooth
     $CHROOT systemctl enable systemd-timesyncd
