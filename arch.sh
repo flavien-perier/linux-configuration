@@ -67,7 +67,7 @@ install_menu() {
 }
 
 create_partitions() {
-    if [[ $DISK == /dev/nvme* ]]
+    if [[ "$DISK" == /dev/nvme* ]]
     then
         DISK1=${DISK}p1
         DISK2=${DISK}p2
@@ -82,63 +82,63 @@ create_partitions() {
 
     if [[ $RESET_DISK -eq 1 ]]
     then
-        parted --script $DISK mklabel gpt
-        parted --script $DISK mkpart primary 1MiB 1GiB
-        parted --script $DISK mkpart primary 1GiB 2GiB
-        parted --script $DISK mkpart primary 2GiB 10Gib
-        parted --script $DISK mkpart primary 10Gib 100%
+        parted --script "$DISK" mklabel gpt
+        parted --script "$DISK" mkpart primary 1MiB 1GiB
+        parted --script "$DISK" mkpart primary 1GiB 2GiB
+        parted --script "$DISK" mkpart primary 2GiB 10Gib
+        parted --script "$DISK" mkpart primary 10Gib 100%
 
-        mkfs.fat -F32 $DISK1
-        mkfs.ext4 $DISK2
-        mkswap $DISK3
+        mkfs.fat -F32 "$DISK1"
+        mkfs.ext4 "$DISK2"
+        mkswap "$DISK3"
 
-        echo -n "$LUKS_PASSWORD" | cryptsetup luksFormat --type luks2 --pbkdf pbkdf2 --hash sha256 --batch-mode --key-file=- $DISK4
-        echo -n "$LUKS_PASSWORD" | cryptsetup luksOpen --key-file=- $DISK4 system
+        echo -n "$LUKS_PASSWORD" | cryptsetup luksFormat --type luks2 --pbkdf pbkdf2 --hash sha256 --batch-mode --key-file=- "$DISK4"
+        echo -n "$LUKS_PASSWORD" | cryptsetup luksOpen --key-file=- "$DISK4" system
 
         mkfs.btrfs -f /dev/mapper/system
 
-        swapon $DISK3
+        swapon "$DISK3"
 
-        mount /dev/mapper/system $INSTALL_DIR
-        btrfs subvolume create $INSTALL_DIR/@
-        btrfs subvolume create $INSTALL_DIR/@home
-        btrfs subvolume create $INSTALL_DIR/@log
-        btrfs subvolume create $INSTALL_DIR/@cache
-        umount $INSTALL_DIR
+        mount /dev/mapper/system "$INSTALL_DIR"
+        btrfs subvolume create "$INSTALL_DIR/@"
+        btrfs subvolume create "$INSTALL_DIR/@home"
+        btrfs subvolume create "$INSTALL_DIR/@log"
+        btrfs subvolume create "$INSTALL_DIR/@cache"
+        umount "$INSTALL_DIR"
     else
-        mkfs.fat -F32 $DISK1
-        mkfs.ext4 $DISK2
-        mkswap $DISK3
+        mkfs.fat -F32 "$DISK1"
+        mkfs.ext4 "$DISK2"
+        mkswap "$DISK3"
 
-        echo -n "$LUKS_PASSWORD" | cryptsetup luksOpen --key-file=- $DISK4 system
+        echo -n "$LUKS_PASSWORD" | cryptsetup luksOpen --key-file=- "$DISK4" system
 
-        mount /dev/mapper/system $INSTALL_DIR
-        btrfs subvolume delete -R $INSTALL_DIR/@
-        btrfs subvolume create $INSTALL_DIR/@
-        btrfs subvolume delete -R $INSTALL_DIR/@cache
-        btrfs subvolume create $INSTALL_DIR/@cache
-        umount $INSTALL_DIR
+        mount /dev/mapper/system "$INSTALL_DIR"
+        btrfs subvolume delete -R "$INSTALL_DIR/@"
+        btrfs subvolume create "$INSTALL_DIR/@"
+        btrfs subvolume delete -R "$INSTALL_DIR/@cache"
+        btrfs subvolume create "$INSTALL_DIR/@cache"
+        umount "$INSTALL_DIR"
     fi
 }
 
 mount_partitions() {
-    mount -o defaults,discard=async,ssd,subvol=@ /dev/mapper/system $INSTALL_DIR
+    mount -o defaults,discard=async,ssd,subvol=@ /dev/mapper/system "$INSTALL_DIR"
 
-    mkdir -p $INSTALL_DIR/tmp
+    mkdir -p "$INSTALL_DIR/tmp"
 
-    mkdir -p $INSTALL_DIR/var/log
-    mount -o defaults,discard=async,ssd,subvol=@log /dev/mapper/system $INSTALL_DIR/var/log
+    mkdir -p "$INSTALL_DIR/var/log"
+    mount -o defaults,discard=async,ssd,subvol=@log /dev/mapper/system "$INSTALL_DIR/var/log"
 
-    mkdir -p $INSTALL_DIR/var/cache
-    mount -o defaults,discard=async,ssd,subvol=@cache /dev/mapper/system $INSTALL_DIR/var/cache
+    mkdir -p "$INSTALL_DIR/var/cache"
+    mount -o defaults,discard=async,ssd,subvol=@cache /dev/mapper/system "$INSTALL_DIR/var/cache"
 
-    mkdir -p $INSTALL_DIR/home
-    mount -o defaults,noatime,compress=zstd,space_cache=v2,subvol=@home /dev/mapper/system $INSTALL_DIR/home
+    mkdir -p "$INSTALL_DIR/home"
+    mount -o defaults,noatime,compress=zstd,space_cache=v2,subvol=@home /dev/mapper/system "$INSTALL_DIR/home"
 
-    mkdir -p $INSTALL_DIR/boot
-    mount $DISK2 $INSTALL_DIR/boot
-    mkdir -p $INSTALL_DIR/boot/efi
-    mount $DISK1 $INSTALL_DIR/boot/efi
+    mkdir -p "$INSTALL_DIR/boot"
+    mount "$DISK2" "$INSTALL_DIR/boot"
+    mkdir -p "$INSTALL_DIR/boot/efi"
+    mount "$DISK1" "$INSTALL_DIR/boot/efi"
 }
 
 install_base_packages() {
@@ -146,7 +146,7 @@ install_base_packages() {
 
     if [[ "$CD_TYPE" == "arch" ]]
     then
-        pacstrap $INSTALL_DIR $BASE_PACKAGES \
+        pacstrap "$INSTALL_DIR" $BASE_PACKAGES \
             linux \
             linux-firmware \
             pipewire
@@ -154,7 +154,7 @@ install_base_packages() {
     then
         pacman-mirrors --fasttrack
 
-        basestrap $INSTALL_DIR $BASE_PACKAGES \
+        basestrap "$INSTALL_DIR" $BASE_PACKAGES \
             base-devel \
             linux618 \
             linux618-headers \
@@ -187,17 +187,17 @@ install_base_packages() {
 copy_NetworkManager_configuration() {
     if [[ -d /etc/NetworkManager/system-connections ]]
     then
-        mkdir -p $INSTALL_DIR/etc/NetworkManager
-        cp -R /etc/NetworkManager/system-connections $INSTALL_DIR/etc/NetworkManager
+        mkdir -p "$INSTALL_DIR/etc/NetworkManager"
+        cp -R /etc/NetworkManager/system-connections "$INSTALL_DIR/etc/NetworkManager"
     fi
 }
 
 configure_hostname() {
-    echo "$HOSTNAME" > $INSTALL_DIR/etc/hostname
+    echo "$HOSTNAME" > "$INSTALL_DIR/etc/hostname"
 }
 
 configure_network() {
-    cat << EOL > $INSTALL_DIR/etc/hosts
+    cat << EOL > "$INSTALL_DIR/etc/hosts"
 127.0.0.1 localhost
 ::1       localhost
 
@@ -205,19 +205,19 @@ configure_network() {
 ::1       $HOSTNAME
 EOL
 
-    mkdir -p $INSTALL_DIR/etc/NetworkManager/conf.d
-    cat << EOL > $INSTALL_DIR/etc/NetworkManager/conf.d/90-dns.conf
+    mkdir -p "$INSTALL_DIR/etc/NetworkManager/conf.d"
+    cat << EOL > "$INSTALL_DIR/etc/NetworkManager/conf.d/90-dns.conf"
 [main]
 dns=systemd-resolved
 EOL
 
-    cat << EOL > $INSTALL_DIR/etc/systemd/resolved.conf
+    cat << EOL > "$INSTALL_DIR/etc/systemd/resolved.conf"
 [Resolve]
 DNS=1.1.1.1 194.242.2.2 94.247.43.254
 FallbackDNS=1.0.0.1 152.53.15.127
 EOL
 
-    rm -f $INSTALL_DIR/etc/resolv.conf
+    rm -f "$INSTALL_DIR/etc/resolv.conf"
     $CHROOT ln -s /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
 
     $CHROOT systemctl enable systemd-resolved
@@ -227,13 +227,13 @@ EOL
 configure_fstab() {
     if [[ "$CD_TYPE" == "arch" ]]
     then
-        genfstab -U $INSTALL_DIR >> $INSTALL_DIR/etc/fstab
+        genfstab -U "$INSTALL_DIR" >> "$INSTALL_DIR/etc/fstab"
     elif [[ "$CD_TYPE" == "manjaro" ]]
     then
-        fstabgen -U $INSTALL_DIR >> $INSTALL_DIR/etc/fstab
+        fstabgen -U "$INSTALL_DIR" >> "$INSTALL_DIR/etc/fstab"
     fi
 
-    echo "tmpfs /tmp tmpfs defaults,noatime,mode=1777 0 0" >> $INSTALL_DIR/etc/fstab
+    echo "tmpfs /tmp tmpfs defaults,noatime,mode=1777 0 0" >> "$INSTALL_DIR/etc/fstab"
 }
 
 install_tools() {
@@ -281,7 +281,7 @@ install_tools() {
 
 
 configure_sudo() {
-    echo "%sudo	ALL=(ALL:ALL) ALL" >> $INSTALL_DIR/etc/sudoers
+    echo "%sudo	ALL=(ALL:ALL) ALL" >> "$INSTALL_DIR/etc/sudoers"
     $CHROOT groupadd sudo
 }
 
@@ -326,25 +326,25 @@ install_de() {
     $CHROOT systemctl enable seatd
 
     $CHROOT bash <(curl -Lqs https://sh.flavien.io/desktop.sh) /etc/skel
-    sed -i 's|value="flavien"|value="arch"|g' $INSTALL_DIR/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml
+    sed -i 's|value="flavien"|value="arch"|g' "$INSTALL_DIR/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
 }
 
 create_user() {
-    $CHROOT useradd -m $USERNAME
-    $CHROOT usermod -a -G sudo $USERNAME
+    $CHROOT useradd -m "$USERNAME"
+    $CHROOT usermod -a -G sudo "$USERNAME"
     echo "$USERNAME:$PASSWORD" | $CHROOT chpasswd
 
     curl -Lqs https://sh.flavien.io/shell.sh | $CHROOT bash -
 }
 
 configure_local() {
-    echo "fr_FR.UTF-8 UTF-8" > $INSTALL_DIR/etc/locale.gen
-    echo "LANG=fr_FR.UTF-8" > $INSTALL_DIR/etc/locale.conf
-    echo "KEYMAP=fr" > $INSTALL_DIR/etc/vconsole.conf
+    echo "fr_FR.UTF-8 UTF-8" > "$INSTALL_DIR/etc/locale.gen"
+    echo "LANG=fr_FR.UTF-8" > "$INSTALL_DIR/etc/locale.conf"
+    echo "KEYMAP=fr" > "$INSTALL_DIR/etc/vconsole.conf"
     $CHROOT ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
     $CHROOT hwclock --systohc
     $CHROOT locale-gen
-    cat << EOL > $INSTALL_DIR/etc/X11/xorg.conf.d/00-keyboard.conf
+    cat << EOL > "$INSTALL_DIR/etc/X11/xorg.conf.d/00-keyboard.conf"
 Section "InputClass"
         Identifier "system-keyboard"
         MatchIsKeyboard "on"
@@ -406,8 +406,7 @@ main() {
         exit 1
     fi
 
-    install_menu $*
-
+    install_menu "$@"
     ip link
     timedatectl set-ntp true
 
@@ -429,4 +428,4 @@ main() {
     configure_grub
 }
 
-main $*
+main "$@"

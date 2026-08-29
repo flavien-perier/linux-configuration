@@ -403,7 +403,7 @@ syntax on
 print_user_paths() {
     local USER_NAME="$1"
 
-    if [ $USER_NAME = "root" ]
+    if [ "$USER_NAME" = "root" ]
     then
         echo "/sbin"
         echo "/usr/sbin"
@@ -472,15 +472,15 @@ securise_location() {
     local USER_GROUP="$2"
     local LOCATION="$3"
 
-    if [ -f $LOCATION ]
+    if [ -f "$LOCATION" ]
     then
-        chown -R $USER_NAME:$USER_GROUP "$LOCATION"
-        chmod 400 $LOCATION
-    elif [ -d $LOCATION ]
+        chown -R "$USER_NAME":"$USER_GROUP" "$LOCATION"
+        chmod 400 "$LOCATION"
+    elif [ -d "$LOCATION" ]
     then
-        chown -R $USER_NAME:$USER_GROUP "$LOCATION"
-        find $LOCATION -type f -exec chmod 400 {} \;
-        find $LOCATION -type d -exec chmod 700 {} \;
+        chown -R "$USER_NAME":"$USER_GROUP" "$LOCATION"
+        find "$LOCATION" -type f -exec chmod 400 {} \;
+        find "$LOCATION" -type d -exec chmod 700 {} \;
     fi
 
 }
@@ -544,19 +544,19 @@ download_scripts() {
         ;;
     esac
 
-    git clone -q --depth 1 -- https://github.com/marlonrichert/zsh-snap.git $LSC_ZNAP
+    git clone -q --depth 1 -- https://github.com/marlonrichert/zsh-snap.git "$LSC_ZNAP"
     printf "zsh-snap $OK\n"
 
-    curl -Lqs https://storage.googleapis.com/kubernetes-release/release/$KUBECTL_VSERSION/bin/linux/$KUBECTL_ARCH/kubectl -o $LSC_USER_BIN/kubectl
+    curl -Lqs https://storage.googleapis.com/kubernetes-release/release/$KUBECTL_VSERSION/bin/linux/$KUBECTL_ARCH/kubectl -o "$LSC_USER_BIN/kubectl"
     printf "kubectl $OK\n"
 
-    curl -Lqs https://raw.githubusercontent.com/ahmetb/kubectx/master/kubectx -o $LSC_USER_BIN/kubectx
+    curl -Lqs https://raw.githubusercontent.com/ahmetb/kubectx/master/kubectx -o "$LSC_USER_BIN/kubectx"
     printf "kubectx $OK\n"
 
-    curl -Lqs https://raw.githubusercontent.com/ahmetb/kubectx/master/kubens -o $LSC_USER_BIN/kubens
+    curl -Lqs https://raw.githubusercontent.com/ahmetb/kubectx/master/kubens -o "$LSC_USER_BIN/kubens"
     printf "kubens $OK\n"
 
-    curl -Lqs https://github.com/kubernetes/kompose/releases/download/$KOMPOSE_VERSION/kompose-linux-$KOMPOSE_ARCH -o $LSC_USER_BIN/kompose
+    curl -Lqs https://github.com/kubernetes/kompose/releases/download/$KOMPOSE_VERSION/kompose-linux-$KOMPOSE_ARCH -o "$LSC_USER_BIN/kompose"
     printf "kompose $OK\n"
 }
 
@@ -575,75 +575,75 @@ install_conf() {
     local USER_PATHS_PATH="$USER_HOME/.user_paths"
     local USER_BIN_DIR="$USER_HOME/bin"
 
-    if [ ! -d $USER_HOME ]
+    if [ ! -d "$USER_HOME" ]
     then
-        mkdir -p $USER_HOME
-        securise_location $USER_NAME $USER_GROUP $USER_HOME
+        mkdir -p "$USER_HOME"
+        securise_location "$USER_NAME" "$USER_GROUP" "$USER_HOME"
     fi
 
-    if [ ! -d $CONFIG_DIR ]
+    if [ ! -d "$CONFIG_DIR" ]
     then
-        mkdir -p $CONFIG_DIR
-        securise_location $USER_NAME $USER_GROUP $CONFIG_DIR
+        mkdir -p "$CONFIG_DIR"
+        securise_location "$USER_NAME" "$USER_GROUP" "$CONFIG_DIR"
     fi
 
-    touch $BASHRC_PATH
-    chmod u+w $BASHRC_PATH
-    print_bashrc > $BASHRC_PATH
-    securise_location $USER_NAME $USER_GROUP $BASHRC_PATH
+    touch "$BASHRC_PATH"
+    chmod u+w "$BASHRC_PATH"
+    print_bashrc > "$BASHRC_PATH"
+    securise_location "$USER_NAME" "$USER_GROUP" "$BASHRC_PATH"
 
-    touch $ZSHRC_PATH
-    chmod u+w $ZSHRC_PATH
-    print_zshrc > $ZSHRC_PATH
-    securise_location $USER_NAME $USER_GROUP $ZSHRC_PATH
+    touch "$ZSHRC_PATH"
+    chmod u+w "$ZSHRC_PATH"
+    print_zshrc > "$ZSHRC_PATH"
+    securise_location "$USER_NAME" "$USER_GROUP" "$ZSHRC_PATH"
 
-    mkdir -p $FISH_DIR
-    chmod -R u+w $FISH_DIR
-    print_fishrc > $FISH_DIR/config.fish
-    securise_location $USER_NAME $USER_GROUP $FISH_DIR
+    mkdir -p "$FISH_DIR"
+    chmod -R u+w "$FISH_DIR"
+    print_fishrc > "$FISH_DIR/config.fish"
+    securise_location "$USER_NAME" "$USER_GROUP" "$FISH_DIR"
 
-    mkdir -p $NEOVIM_DIR
-    chmod -R u+w $NEOVIM_DIR
-    print_neovim > $NEOVIM_DIR/init.vim
-    securise_location $USER_NAME $USER_GROUP $NEOVIM_DIR
+    mkdir -p "$NEOVIM_DIR"
+    chmod -R u+w "$NEOVIM_DIR"
+    print_neovim > "$NEOVIM_DIR/init.vim"
+    securise_location "$USER_NAME" "$USER_GROUP" "$NEOVIM_DIR"
 
-    if [ -f $ZNAP_DIR ]
+    if [ -f "$ZNAP_DIR" ]
     then
-        chmod -R u+w $ZNAP_DIR
-        rm -Rf $ZNAP_DIR
+        chmod -R u+w "$ZNAP_DIR"
+        rm -Rf "$ZNAP_DIR"
     fi
-    mkdir -p $ZNAP_DIR
-    cp -r $LSC_ZNAP $ZNAP_DIR/znap
-    securise_location $USER_NAME $USER_GROUP $ZNAP_DIR
+    mkdir -p "$ZNAP_DIR"
+    cp -r "$LSC_ZNAP" "$ZNAP_DIR/znap"
+    securise_location "$USER_NAME" "$USER_GROUP" "$ZNAP_DIR"
 
-    if [ ! -f $ALIAS_PATH ]
+    if [ ! -f "$ALIAS_PATH" ]
     then
-        touch $ALIAS_PATH
-        print_alias_list > $ALIAS_PATH
-        securise_location $USER_NAME $USER_GROUP $ALIAS_PATH
-    fi
-
-    if [ ! -f $USER_PATHS_PATH ]
-    then
-        touch $USER_PATHS_PATH
-        print_user_paths "$USER_NAME" > $USER_PATHS_PATH
-        securise_location $USER_NAME $USER_GROUP $USER_PATHS_PATH
+        touch "$ALIAS_PATH"
+        print_alias_list > "$ALIAS_PATH"
+        securise_location "$USER_NAME" "$USER_GROUP" "$ALIAS_PATH"
     fi
 
-    mkdir -p $USER_BIN_DIR
-    if [ -d $LSC_USER_BIN ] && [ $USER_NAME != "root" ]
+    if [ ! -f "$USER_PATHS_PATH" ]
     then
-        chmod -R u+w $USER_BIN_DIR
-        cp -R $LSC_USER_BIN/* $USER_BIN_DIR/
-        securise_location $USER_NAME $USER_GROUP $USER_BIN_DIR
-        chmod u+x $USER_BIN_DIR/*
+        touch "$USER_PATHS_PATH"
+        print_user_paths "$USER_NAME" > "$USER_PATHS_PATH"
+        securise_location "$USER_NAME" "$USER_GROUP" "$USER_PATHS_PATH"
+    fi
+
+    mkdir -p "$USER_BIN_DIR"
+    if [ -d "$LSC_USER_BIN" ] && [ "$USER_NAME" != "root" ]
+    then
+        chmod -R u+w "$USER_BIN_DIR"
+        cp -R "$LSC_USER_BIN"/* "$USER_BIN_DIR/"
+        securise_location "$USER_NAME" "$USER_GROUP" "$USER_BIN_DIR"
+        chmod u+x "$USER_BIN_DIR"/*
     fi
 
     printf "Configure user \033[0;36m$USER_NAME\033[0m with home \033[0;36m$USER_HOME\033[0m $OK\n"
 }
 
 main() {
-    if [ $(id -u) -eq 0 ]
+    if [ "$(id -u)" -eq 0 ]
     then
         install_packages
         download_scripts
@@ -663,10 +663,10 @@ main() {
 
             if command_exists chsh && command_exists fish
             then
-                chsh -s $(which fish) "$USER_NAME"
+                chsh -s "$(which fish)" "$USER_NAME"
             elif command_exists chsh && command_exists zsh
             then
-                chsh -s $(which zsh) "$USER_NAME"
+                chsh -s "$(which zsh)" "$USER_NAME"
             fi
         done
 
@@ -692,15 +692,15 @@ main() {
 
         if command_exists chsh && command_exists fish
         then
-            chsh -s $(which fish) "$USER_NAME"
+            chsh -s "$(which fish)" "$USER_NAME"
         elif command_exists chsh && command_exists zsh
         then
-            chsh -s $(which zsh) "$USER_NAME"
+            chsh -s "$(which zsh)" "$USER_NAME"
         fi
     fi
 
-    rm -Rf $LSC_USER_BIN
-    rm -Rf $LSC_ZNAP
+    rm -Rf "$LSC_USER_BIN"
+    rm -Rf "$LSC_ZNAP"
 
     printf "Installation $OK\n"
 }
