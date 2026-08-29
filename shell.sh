@@ -463,6 +463,22 @@ alias use-fish="exec fish"
 alias use-zsh="exec zsh"'
 }
 
+configure_variable_environment() {
+    local ENVIRONMENT_PATH="/etc/environment"
+
+    touch "$ENVIRONMENT_PATH"
+
+    if ! grep -q "^EDITOR=" "$ENVIRONMENT_PATH"
+    then
+        echo "EDITOR=nvim" >> "$ENVIRONMENT_PATH"
+    fi
+
+    if ! grep -q "^VISUAL=" "$ENVIRONMENT_PATH"
+    then
+        echo "VISUAL=nvim" >> "$ENVIRONMENT_PATH"
+    fi
+}
+
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
@@ -669,6 +685,8 @@ main() {
                 chsh -s "$(which zsh)" "$USER_NAME"
             fi
         done
+
+        configure_variable_environment
 
         install_conf root root ~
         command_exists chsh && chsh -s /bin/bash
