@@ -30,6 +30,8 @@ bindsym $mod+Ctrl+Right workspace next
 bindsym $mod+Ctrl+Shift+Left move container to workspace prev
 bindsym $mod+Ctrl+Shift+Right move container to workspace next
 
+bindsym $mod+Tab focus next sibling
+
 bindsym $mod+Shift+h splith
 bindsym $mod+Shift+v splitv
 

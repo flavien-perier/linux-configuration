@@ -18,6 +18,7 @@ for_window [app_id="imv"] floating enable
 for_window [app_id="mpv"] floating enable
 for_window [app_id="xfce4-appfinder"] floating enable
 for_window [title="Whisker Menu"] floating enable
+for_window [title="Whisker Menu"] focus
 for_window [title="Panel Preferences"] floating enable
 for_window [title="Display"] floating enable
 for_window [title="Settings"] floating enable
