@@ -241,6 +241,7 @@ install_tools() {
     local COMPRESSION_PACKAGES="xz zip unzip 7zip unrar"
     local TLP_PACKAGES="tlp tlpui"
     local SECURITY_PACKAGES="libfido2 gnome-keyring apparmor"
+    local FS_PACKAGES="ntfs-3g exfatprogs"
     local BLUETOOTH_PACKAGES="blueman bluez bluez-utils"
     local THUNDERBOLT_PCKAGES="bolt tbtools"
     local CLIPBOARD_PACKAGES="xclip wl-clipboard"
@@ -267,6 +268,7 @@ install_tools() {
         $COMPRESSION_PACKAGES \
         $TLP_PACKAGES \
         $SECURITY_PACKAGES \
+        $FS_PACKAGES \
         $BLUETOOTH_PACKAGES \
         $THUNDERBOLT_PCKAGES \
         $CLIPBOARD_PACKAGES
